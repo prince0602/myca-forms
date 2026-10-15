@@ -38,8 +38,8 @@ Deployment:
         SPRING_PROFILES_ACTIVE: vault:namespaced/data/patientforms/patientforms#SPRING_PROFILES_ACTIVE
         SPRING_APPLICATION_NAME: vault:namespaced/data/patientforms/patientforms#SPRING_APPLICATION_NAME
         SERVER_PORT: vault:namespaced/data/patientforms/patientforms#SERVER_PORT
-        AWS_ACCESSKEY: vault:namespaced/data/patientforms/patientforms#AWS_SECRET_ACCESS_KEY
-        AWS_SECRETKEY: vault:namespaced/data/patientforms/patientforms#AWS_ACCESS_KEY_ID
+        AWS_ACCESSKEY: vault:namespaced/data/patientforms/patientforms#AWS_ACCESSKEY
+        AWS_SECRETKEY: vault:namespaced/data/patientforms/patientforms#AWS_SECRETKEY
         AWS_REGION: vault:namespaced/data/patientforms/patientforms#AWS_REGION
         S3_BUCKET_NAME: vault:namespaced/data/patientforms/patientforms#S3_BUCKET_NAME
         PRESIGNED_URL_TTL: vault:namespaced/data/patientforms/patientforms#PRESIGNED_URL_TTL
@@ -47,7 +47,6 @@ Deployment:
         TENANT_DB_CONFIG_URL: vault:namespaced/data/patientforms/patientforms#TENANT_DB_CONFIG_URL
         MULTITENANCY_TENANT_REPOSITORY_PACKAGES: vault:namespaced/data/patientforms/patientforms#MULTITENANCY_TENANT_REPOSITORY_PACKAGES
         MULTITENANCY_TENANT_ENTITY_MANAGER_PACKAGES: vault:namespaced/data/patientforms/patientforms#MULTITENANCY_TENANT_ENTITY_MANAGER_PACKAGES
-        MULTITENANCY_TENANT_DATASOURCE_URL_PREFIX: vault:namespaced/data/patientforms/patientforms#MULTITENANCY_TENANT_DATASOURCE_URL_PREFIX
         MULTITENANCY_TENANT_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: vault:namespaced/data/patientforms/patientforms#MULTITENANCY_TENANT_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
         MULTITENANCY_TENANT_DATASOURCE_HIKARI_MINIMUM_IDLE: vault:namespaced/data/patientforms/patientforms#MULTITENANCY_TENANT_DATASOURCE_HIKARI_MINIMUM_IDLE
         MULTITENANCY_TENANT_DATASOURCE_HIKARI_IDLE_TIMEOUT: vault:namespaced/data/patientforms/patientforms#MULTITENANCY_TENANT_DATASOURCE_HIKARI_IDLE_TIMEOUT
