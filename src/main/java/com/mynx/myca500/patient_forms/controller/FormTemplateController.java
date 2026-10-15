@@ -31,8 +31,9 @@ public class FormTemplateController {
     private FormTemplateService service;
 
     @GetMapping
-    public Paginated<FormTemplateListItem> list(@RequestParam(defaultValue = "0") int page,
-                                                  @RequestParam(defaultValue = "20") int size) {
+    public Paginated<FormTemplateListItem> list(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size) {
         return service.list(page, size);
     }
 

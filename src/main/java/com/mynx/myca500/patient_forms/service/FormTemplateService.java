@@ -24,9 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,19 +40,26 @@ public class FormTemplateService {
     private final FormTemplateMapper mapper;
 
 
+
     @Transactional(readOnly = true)
     public Paginated<FormTemplateListItem> list(int page, int size) {
-        PageRequest pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100),
-                Sort.by(Sort.Direction.DESC, "updatedAt"));
+
+        PageRequest pageable = PageRequest.of(
+                Math.max(page - 1, 0),
+                Math.min(Math.max(size, 1), 100),
+                Sort.by(Sort.Direction.DESC, "updatedAt")
+        );
+
         Page<FormTemplate> result = templates.findAll(pageable);
 
-        Map<UUID, Long> counts = result.isEmpty() ? Map.of()
-                : sentForms.countByTemplateIds(result.map(FormTemplate::getId).getContent()).stream()
-                        .collect(Collectors.toMap(SentFormRepository.TemplateSentCount::getTemplateId, SentFormRepository.TemplateSentCount::getTotal));
+        List<FormTemplateListItem> items = result.getContent()
+                .stream()
+                .map(template -> mapper.toListItem(template, 0L))
+                .toList();
 
-        List<FormTemplateListItem> items = result.map(t -> mapper.toListItem(t, counts.getOrDefault(t.getId(), 0L))).getContent();
         return new Paginated<>(items, result.getTotalElements());
     }
+
 
     @Transactional(readOnly = true)
     public FormTemplateDetailResponse get(UUID id) {
