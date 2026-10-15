@@ -38,12 +38,13 @@ Deployment:
         SPRING_PROFILES_ACTIVE: vault:namespaced/data/patientforms/patientforms#SPRING_PROFILES_ACTIVE
         SPRING_APPLICATION_NAME: vault:namespaced/data/patientforms/patientforms#SPRING_APPLICATION_NAME
         SERVER_PORT: vault:namespaced/data/patientforms/patientforms#SERVER_PORT
-        AWS_SECRET_ACCESS_KEY: vault:namespaced/data/patientforms/patientforms#AWS_SECRET_ACCESS_KEY
-        AWS_ACCESS_KEY_ID: vault:namespaced/data/patientforms/patientforms#AWS_ACCESS_KEY_ID
+        AWS_ACCESSKEY: vault:namespaced/data/patientforms/patientforms#AWS_SECRET_ACCESS_KEY
+        AWS_SECRETKEY: vault:namespaced/data/patientforms/patientforms#AWS_ACCESS_KEY_ID
+        AWS_REGION: vault:namespaced/data/patientforms/patientforms#AWS_REGION
         S3_BUCKET_NAME: vault:namespaced/data/patientforms/patientforms#S3_BUCKET_NAME
         PRESIGNED_URL_TTL: vault:namespaced/data/patientforms/patientforms#PRESIGNED_URL_TTL
-        TENANT_ONBORDING_BASE_URL: vault:namespaced/data/patientforms/patientforms#TENANT_ONBORDING_BASE_URL
-        MULTITENANCY_MASTER_CONFIGURATION_ENDPOINT: vault:namespaced/data/patientforms/patientforms#TENANT_DB_CONFIG_URL
+        TENANT_ONBOARDING_URL: vault:namespaced/data/patientforms/patientforms#TENANT_ONBOARDING_URL
+        TENANT_DB_CONFIG_URL: vault:namespaced/data/patientforms/patientforms#TENANT_DB_CONFIG_URL
         MULTITENANCY_TENANT_REPOSITORY_PACKAGES: vault:namespaced/data/patientforms/patientforms#MULTITENANCY_TENANT_REPOSITORY_PACKAGES
         MULTITENANCY_TENANT_ENTITY_MANAGER_PACKAGES: vault:namespaced/data/patientforms/patientforms#MULTITENANCY_TENANT_ENTITY_MANAGER_PACKAGES
         MULTITENANCY_TENANT_DATASOURCE_URL_PREFIX: vault:namespaced/data/patientforms/patientforms#MULTITENANCY_TENANT_DATASOURCE_URL_PREFIX
