@@ -1,0 +1,6 @@
+dependencies:
+- name: common-chart
+  repository: https://chartmuseum.mgmt.prod.mynxsoftwares.com
+  version: 1.0.0
+digest: sha256:4c453d2e9206d8924c838b365daf42ddab814ea165869fc3c356a00427831b89
+generated: "2024-07-21T20:46:09.90355+05:30"

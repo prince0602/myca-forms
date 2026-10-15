@@ -1,0 +1,9 @@
+@Library(value="ci@master", changelog=false) _
+
+helm_generic([
+    directoryPath: "charts/patientforms",
+    imageName: "mynx-use1-pp-patient-forms-ecr",
+    app: "patientforms",
+    prefix: "mynx-use1",
+    image_tag_helm_path: ".Deployment.containers.patientforms.image.tag"
+])

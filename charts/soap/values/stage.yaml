@@ -1,0 +1,74 @@
+global: {}
+fullnameOverride: ""
+ServiceAccount:
+  automountServiceAccountToken: true
+  name: soap
+Deployment:
+  name: soap
+  annotations:
+    instrumentation.opentelemetry.io/inject-java: "trace/default"
+    vault.security.banzaicloud.io/vault-addr: https://vault.secret-manager.svc.cluster.local:8200
+    vault.security.banzaicloud.io/vault-role: vault_access
+    vault.security.banzaicloud.io/vault-skip-verify: "true"
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  containers:
+    soap:
+      image:
+        registry: "297899656771.dkr.ecr.ap-south-1.amazonaws.com"
+        repository: "mynx-use1-stage-soap-ecr"
+        tag: "snapshot_1.0-SNAPSHOT_feature_soap_scribber_v4.1_f3255e0"
+      imagePullPolicy: IfNotPresent
+      ports:
+        - containerPort: 8085
+          protocol: TCP
+          name: http
+      resources:
+        limits:
+          cpu: "400m"
+          memory: "512Mi"
+        requests:
+          cpu: "10m"
+          memory: "512Mi"
+      env:
+        SPRING_PROFILES_ACTIVE: vault:namespaced/data/soap/soap#SPRING_PROFILES_ACTIVE
+        PATIENT_BASE_URL: vault:namespaced/data/soap/soap#PATIENT_BASE_URL
+        META_BASE_URL: vault:namespaced/data/soap/soap#META_BASE_URL
+        AWS_SECRET_ACCESS_KEY: vault:namespaced/data/soap/soap#AWS_SECRET_ACCESS_KEY
+        AWS_ACCESS_KEY_ID: vault:namespaced/data/soap/soap#AWS_ACCESS_KEY_ID
+        SOAP_NOTIF_TTL: vault:namespaced/data/soap/soap#SOAP_NOTIF_TTL
+        SOAP_NOTIFICATION_CRON: vault:namespaced/data/soap/soap#SOAP_NOTIFICATION_CRON
+        REDIS_HOST: vault:namespaced/data/soap/soap#REDIS_HOST
+        IDENTITY_BASE_URL: vault:namespaced/data/soap/soap#IDENTITY_BASE_URL
+        TENANT_ONBOARDING_URL: vault:namespaced/data/soap/soap#TENANT_ONBOARDING_URL
+        LOGO_FILE_NAME: vault:namespaced/data/soap/soap#LOGO_FILE_NAME
+        WATERMARK_FILE_NAME: vault:namespaced/data/soap/soap#WATERMARK_FILE_NAME
+        DATA_EXCHANGE_URL: vault:namespaced/data/soap/soap#DATA_EXCHANGE_URL
+        MULTITENANCY_TENANT_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: vault:namespaced/data/soap/soap#MULTITENANCY_TENANT_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+        MULTITENANCY_TENANT_DATASOURCE_HIKARI_MINIMUM_IDLE: vault:namespaced/data/soap/soap#MULTITENANCY_TENANT_DATASOURCE_HIKARI_MINIMUM_IDLE
+        MULTITENANCY_TENANT_DATASOURCE_HIKARI_IDLE_TIMEOUT: vault:namespaced/data/soap/soap#MULTITENANCY_TENANT_DATASOURCE_HIKARI_IDLE_TIMEOUT
+        JAVA_OPTS: -XX:+UseContainerSupport -XX:MaxRAMPercentage=80 -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+ExitOnOutOfMemoryError
+        AUTHCENTRAL_BASE_URL: vault:namespaced/data/soap/soap#AUTHCENTRAL_BASE_URL
+        REDIS_LISTENER_ENABLED: vault:namespaced/data/soap/soap#REDIS_LISTENER_ENABLED
+        WEBSOCKET_BROKER_HEARTBEAT: vault:namespaced/data/soap/soap#WEBSOCKET_BROKER_HEARTBEAT
+        WEBSOCKET_STOMP_HEARTBEAT: vault:namespaced/data/soap/soap#WEBSOCKET_STOMP_HEARTBEAT
+        WEBSOCKET_DISCONNECT_DELAY: vault:namespaced/data/soap/soap#WEBSOCKET_DISCONNECT_DELAY
+        WEBSOCKET_STREAM_BYTE_LIMIT: vault:namespaced/data/soap/soap#WEBSOCKET_STREAM_BYTE_LIMIT
+        WEBSOCKET_MESSAGE_SIZE_LIMIT: vault:namespaced/data/soap/soap#WEBSOCKET_MESSAGE_SIZE_LIMIT
+        WEBSOCKET_SEND_BUFFER_SIZE_LIMIT: vault:namespaced/data/soap/soap#WEBSOCKET_SEND_BUFFER_SIZE_LIMIT
+        WEBSOCKET_SEND_TIME_LIMIT: vault:namespaced/data/soap/soap#WEBSOCKET_SEND_TIME_LIMIT
+        WEBSOCKET_TIME_TO_FIRST_MESSAGE: vault:namespaced/data/soap/soap#WEBSOCKET_TIME_TO_FIRST_MESSAGE
+        TOMCAT_ACCEPT_COUNT: vault:namespaced/data/soap/soap#TOMCAT_ACCEPT_COUNT
+        TOMCAT_MAX_CONNECTIONS: vault:namespaced/data/soap/soap#TOMCAT_MAX_CONNECTIONS
+        TOMCAT_CONNECTION_TIMEOUT: vault:namespaced/data/soap/soap#TOMCAT_CONNECTION_TIMEOUT
+Service:
+  soap:
+    name: soap
+    ports:
+      - port: 80
+        targetPort: 8085
+    sessionAffinity: None

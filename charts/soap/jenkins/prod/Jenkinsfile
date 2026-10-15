@@ -1,0 +1,6 @@
+@Library(value="ci@master", changelog=false) _
+helm([
+    repositoryUrl: "https://chartmuseum.mgmt.prod.mynxsoftwares.com/",
+    directoryPath: "charts/patientforms/",
+    ecrRepo: "973991485835.dkr.ecr.us-east-1.amazonaws.com"
+])

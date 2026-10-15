@@ -1,0 +1,11 @@
+global: {}
+
+fullnameOverride: ""
+
+ServiceAccount: {}
+
+Deployment: {}
+
+Service: {}
+
+HorizontalPodAutoscaler: {}
