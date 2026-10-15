@@ -21,7 +21,7 @@ Deployment:
       image:
         registry: "232543634414.dkr.ecr.us-east-1.amazonaws.com"
         repository: "mynx-use1-pp-patient-forms-ecr"
-        tag: "snapshot_1.0.0_main_dfb867f"
+        tag: "snapshot_1.0.0_main_4177d1f"
       imagePullPolicy: IfNotPresent
       ports:
         - containerPort: 9191
