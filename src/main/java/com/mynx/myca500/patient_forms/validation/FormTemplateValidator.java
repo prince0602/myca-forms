@@ -15,10 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-/**
- * Business rules that annotations can't express (AC3 + AC4).
- * Returns the tab tree to persist: empty tabs are dropped (AC3-S9). Throws 400 with ALL problems at once.
- */
+
 @Component
 public class FormTemplateValidator {
 

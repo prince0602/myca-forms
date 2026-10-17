@@ -9,9 +9,9 @@ import java.util.List;
 
 public record FieldConfig(
         @Size(max = 255) String placeholder,
-        @Size(max = 50) String prefix,
-        @Size(max = 50) String suffix,
-        @Size(max = 500) String helpText,
+        @Size(max = 1000) String prefix,
+        @Size(max = 1000) String suffix,
+        @Size(max = 2000) String helpText,
         @Positive Integer maxLength,
         InputFormat format,
         @Valid List<FieldOption> options,

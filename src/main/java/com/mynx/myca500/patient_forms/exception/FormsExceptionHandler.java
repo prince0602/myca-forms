@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
 
-/** Every error leaves as RFC 7807 ProblemDetail: {status, detail, errors[]}. The frontend shows `detail`/`errors`. */
 @RestControllerAdvice("formsExceptionHandler")
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class FormsExceptionHandler {

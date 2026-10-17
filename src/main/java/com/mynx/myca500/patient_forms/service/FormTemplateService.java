@@ -54,7 +54,7 @@ public class FormTemplateService {
 
         List<FormTemplateListItem> items = result.getContent()
                 .stream()
-                .map(template -> mapper.toListItem(template, 0L))
+                .map(template -> mapper.toListItem(template))
                 .toList();
 
         return new Paginated<>(items, result.getTotalElements());
