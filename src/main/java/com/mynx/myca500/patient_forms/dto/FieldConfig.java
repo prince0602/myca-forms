@@ -1,6 +1,8 @@
 package com.mynx.myca500.patient_forms.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.mynx.myca500.patient_forms.enums.InputFormat;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -15,7 +17,12 @@ public record FieldConfig(
         @Positive Integer maxLength,
         InputFormat format,
         @Valid List<FieldOption> options,
-        @Valid FormattedText content) {
+        @Valid FormattedText content,
+        @JsonInclude(JsonInclude.Include.NON_NULL) JsonNode columns,
+        @JsonInclude(JsonInclude.Include.NON_NULL) Double min,
+        @JsonInclude(JsonInclude.Include.NON_NULL) Double max,
+        @JsonInclude(JsonInclude.Include.NON_NULL) Boolean halfWidth,
+        JsonNode visibleWhen) {
 
     public FieldConfig {
         placeholder = nz(placeholder);
@@ -28,7 +35,8 @@ public record FieldConfig(
     }
 
     public static FieldConfig empty() {
-        return new FieldConfig(null, null, null, null, null, null, null, null);
+        return new FieldConfig(null, null, null, null, null, null, null, null,
+                null, null, null, null, null);
     }
 
     private static String nz(String s) { return s == null ? "" : s; }

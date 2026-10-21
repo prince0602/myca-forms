@@ -3,7 +3,7 @@ package com.mynx.myca500.patient_forms.enums;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum InputFormat {
-    PLAIN("Plain"), TEXT_AREA("TextArea"), NUMBER("Number"), EMAIL("Email");
+    PLAIN("Plain"), TEXT_AREA("TextArea"), NUMBER("Number"), EMAIL("Email"),PHONE("Phone");
 
     private final String value;
 
