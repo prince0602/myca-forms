@@ -87,9 +87,6 @@ public class FormTemplateValidator {
             }
             return;
         }
-        if (f.label().isBlank()) {
-            errors.add("Field label is required (field id " + f.id() + ")");
-        }
         if (f.type().isChoice()) {
             validateOptions(f, errors);
         }
