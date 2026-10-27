@@ -3,7 +3,7 @@ package com.mynx.myca500.patient_forms.enums;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum FieldType {
-    TAB("Tab"), FREE_TEXT("FreeText"), INPUT("Input"), DROPDOWN("Dropdown"),
+    TAB("Tab"),DOCUMENT("Document"), FREE_TEXT("FreeText"), INPUT("Input"), DROPDOWN("Dropdown"),
     CHECKBOX("Checkbox"), RADIO("Radio"), DATE("Date"), SIGNATURE("Signature"),
     BODY_DIAGRAM("BodyDiagram"), TABLE("Table"), SCALE("Scale");
 

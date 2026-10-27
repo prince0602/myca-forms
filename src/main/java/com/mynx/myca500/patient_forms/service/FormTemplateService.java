@@ -17,6 +17,7 @@ import com.mynx.myca500.patient_forms.repository.FormTemplateVersionRepository;
 import com.mynx.myca500.patient_forms.repository.SentFormRepository;
 import com.mynx.myca500.patient_forms.validation.FormTemplateValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -28,6 +29,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FormTemplateService {
 
     static final String NAME_IN_USE = "Name already in use by an active template";
@@ -38,7 +40,6 @@ public class FormTemplateService {
     private final SentFormRepository sentForms;
     private final FormTemplateValidator validator;
     private final FormTemplateMapper mapper;
-
 
 
     @Transactional(readOnly = true)
@@ -54,10 +55,11 @@ public class FormTemplateService {
 
         List<FormTemplateListItem> items = result.getContent()
                 .stream()
-                .map(template -> mapper.toListItem(template))
+                .map(mapper::toListItem)
                 .toList();
 
         return new Paginated<>(items, result.getTotalElements());
+
     }
 
 
@@ -69,7 +71,8 @@ public class FormTemplateService {
 
 
     @Transactional
-    public FormTemplateDetailResponse create(SaveFormTemplateRequest req,String userId) {
+    public FormTemplateDetailResponse create(SaveFormTemplateRequest req, String userId) {
+
         FormTemplatePayload p = req.payload();
         List<FormFieldDto> fields = validator.validateAndNormalize(p);
         boolean activate = req.mode() == SaveMode.SAVE_AND_ACTIVATE;
@@ -87,6 +90,7 @@ public class FormTemplateService {
         templates.saveAndFlush(t);
 
         return mapper.toDetail(t, saveVersion(t, p, fields));
+
     }
 
     @Transactional
@@ -115,10 +119,12 @@ public class FormTemplateService {
         templates.saveAndFlush(t);
 
         return mapper.toDetail(t, saveVersion(t, p, fields));
+
     }
 
     @Transactional
     public FormTemplateDetailResponse activate(UUID id) {
+
         FormTemplate t = find(id);
         if (t.getStatus() != TemplateStatus.ACTIVE) {
             if (nameTakenByOther(t.getName(), id)) {
@@ -128,16 +134,19 @@ public class FormTemplateService {
             templates.saveAndFlush(t);
         }
         return mapper.toDetail(t, currentVersion(t));
+
     }
 
     @Transactional
     public FormTemplateDetailResponse deactivate(UUID id) {
+
         FormTemplate t = find(id);
         if (t.getStatus() != TemplateStatus.INACTIVE) {
             t.setStatus(TemplateStatus.INACTIVE);
             templates.saveAndFlush(t);
         }
         return mapper.toDetail(t, currentVersion(t));
+
     }
 
     @Transactional
@@ -160,6 +169,7 @@ public class FormTemplateService {
         v.setExpirationHours(sourceVersion.getExpirationHours());
         v.setFields(sourceVersion.getFields());
         return mapper.toDetail(copy, versions.save(v));
+
     }
 
 

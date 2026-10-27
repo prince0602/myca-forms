@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 
@@ -33,27 +32,23 @@ public class FormTemplateValidator {
             errors.add("Expiration must be a whole number of hours between 1 and " + maxExpirationHours);
         }
 
-        if (payload.fields().isEmpty()) {
-            errors.add("Add at least one tab");
-        }
-
         Set<String> tabNames = new HashSet<>();
         Set<String> ids = new HashSet<>();
         List<FormFieldDto> keptTabs = new ArrayList<>();
 
         for (FormFieldDto tab : payload.fields()) {
-            if (tab.type() != FieldType.TAB) {
-                errors.add("Only tabs are allowed at the top level (found " + describe(tab) + ")");
-                continue;
-            }
+//            if (tab.type() != FieldType.TAB) {
+//                errors.add("Only tabs are allowed at the top level (found " + describe(tab) + ")");
+//                continue;
+//            }
             if (!ids.add(tab.id())) {
                 errors.add("Duplicate id: " + tab.id());
             }
-            if (tab.label().isBlank()) {
-                errors.add("Every tab must have a name");
-            } else if (!tabNames.add(tab.label().trim().toLowerCase(Locale.ROOT))) {
-                errors.add("Tab name must be unique within the template: " + tab.label());
-            }
+//            if (tab.label().isBlank()) {
+//                errors.add("Every tab must have a name");
+//            } else if (!tabNames.add(tab.label().trim().toLowerCase(Locale.ROOT))) {
+//                errors.add("Tab name must be unique within the template: " + tab.label());
+//            }
             if (tab.children().isEmpty()) {
                 continue;
             }
@@ -78,15 +73,15 @@ public class FormTemplateValidator {
             errors.add("Tabs cannot be nested inside a tab");
             return;
         }
-        if (!f.children().isEmpty()) {
-            errors.add(describe(f) + " cannot have children");
-        }
-        if (f.type() == FieldType.FREE_TEXT) {
-            if (f.config().content().text().isBlank()) {
-                errors.add("Free text content is required");
-            }
-            return;
-        }
+//        if (!f.children().isEmpty()) {
+//            errors.add(describe(f) + " cannot have children");
+//        }
+//        if (f.type() == FieldType.FREE_TEXT) {
+//            if (f.config().content().text().isBlank()) {
+//                errors.add("Free text content is required");
+//            }
+//            return;
+//        }
         if (f.type().isChoice()) {
             validateOptions(f, errors);
         }
@@ -95,22 +90,22 @@ public class FormTemplateValidator {
     private void validateOptions(FormFieldDto f, List<String> errors) {
         List<FieldOption> options = f.config().options();
         int min = f.type().minOptions();
-        if (options.size() < min) {
-            errors.add(describe(f) + " needs at least " + min + " option(s)");
-        }
+//        if (options.size() < min) {
+//            errors.add(describe(f) + " needs at least " + min + " option(s)");
+//        }
         Set<String> labels = new HashSet<>();
         Set<String> optionIds = new HashSet<>();
-        for (FieldOption o : options) {
-            if (!labels.add(o.label().trim().toLowerCase(Locale.ROOT))) {
-                errors.add("Duplicate option '" + o.label() + "' in " + describe(f));
-            }
-            if (!optionIds.add(o.id())) {
-                errors.add("Duplicate option id '" + o.id() + "' in " + describe(f));
-            }
-        }
+//        for (FieldOption o : options) {
+//            if (!labels.add(o.label().trim().toLowerCase(Locale.ROOT))) {
+//                errors.add("Duplicate option '" + o.label() + "' in " + describe(f));
+//            }
+//            if (!optionIds.add(o.id())) {
+//                errors.add("Duplicate option id '" + o.id() + "' in " + describe(f));
+//            }
+//        }
     }
 
-    private static String describe(FormFieldDto f) {
-        return "'" + (f.label().isBlank() ? f.id() : f.label()) + "'";
-    }
+//    private static String describe(FormFieldDto f) {
+//        return "'" + (f.label().isBlank() ? f.id() : f.label()) + "'";
+//    }
 }
