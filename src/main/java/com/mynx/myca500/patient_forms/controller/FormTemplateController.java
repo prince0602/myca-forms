@@ -6,11 +6,15 @@ import com.mynx.myca500.patient_forms.dto.FormTemplateDetailResponse;
 import com.mynx.myca500.patient_forms.dto.FormTemplateListItem;
 import com.mynx.myca500.patient_forms.dto.Paginated;
 import com.mynx.myca500.patient_forms.dto.SaveFormTemplateRequest;
+import com.mynx.myca500.patient_forms.dto.SavedComponentRequest;
+import com.mynx.myca500.patient_forms.dto.SavedComponentResponse;
 import com.mynx.myca500.patient_forms.service.FormTemplateService;
+import com.mynx.myca500.patient_forms.service.SavedComponentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +23,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -29,6 +36,9 @@ public class FormTemplateController {
 
     @Autowired
     private FormTemplateService service;
+
+    @Autowired
+    private SavedComponentService savedComponentService;
 
     @GetMapping
     public Paginated<FormTemplateListItem> list(
@@ -67,6 +77,32 @@ public class FormTemplateController {
     @PostMapping("/{id}/duplicate")
     public ResponseEntity<FormTemplateDetailResponse> duplicate(@PathVariable UUID id) {
         return ResponseEntity.ok(service.duplicate(id));
+    }
+
+    @PostMapping("/component")
+    public ResponseEntity<SavedComponentResponse> create(@Valid @RequestBody SavedComponentRequest request,
+                                                         HttpServletRequest httpServletRequest) {
+        String userId = getUserId(httpServletRequest);
+        SavedComponentResponse body = savedComponentService.create(request, userId);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}").buildAndExpand(body.id()).toUri();
+        return ResponseEntity.created(location).body(body);
+    }
+
+    @GetMapping("/component")
+    public List<SavedComponentResponse> list() {
+        return savedComponentService.list();
+    }
+
+    @GetMapping("/component/{id}")
+    public SavedComponentResponse getComponent(@PathVariable UUID id) {
+        return savedComponentService.get(id);
+    }
+
+    @DeleteMapping("component/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        savedComponentService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     private String getUserId(HttpServletRequest request) {
