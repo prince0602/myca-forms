@@ -30,7 +30,6 @@ import static org.carlspring.cloud.storage.s3fs.S3Factory.SECRET_KEY;
 @EnableConfigurationProperties(TwilioProperties.class)
 public class AppConfig implements WebMvcConfigurer {
 
-    // Not a constant in every s3fs library, so defined here; check the key name your library expects
     private static final String REGION = "s3fs_region";
 
     @Value("${aws.accesskey}")
