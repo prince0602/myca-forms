@@ -1,6 +1,7 @@
 package com.mynx.myca500.patient_forms.controller;
 
-import com.mynx.myca500.commons.exceptions.ValidationException;
+
+import com.mynx.myca500.patient_forms.exception.ValidationException;
 import com.mynx.myca500.patient_forms.service.S3PresignedUrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +15,7 @@ public class S3Controller {
 
     @Autowired
     private S3PresignedUrlService s3PresignedUrlService;
-    private static final String FORMS_COMMON_FOLDER = "forms-common";
+    private static final String FORMS_COMMON_FOLDER = "001";
 
     @GetMapping("/generate-upload-url")
     public String generateUploadUrl(

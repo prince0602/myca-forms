@@ -1,10 +1,11 @@
 package com.mynx.myca500.patient_forms.service;
 
-import com.mynx.myca500.commons.exceptions.AccessDeniedException;
-import com.mynx.myca500.commons.exceptions.DuplicateResourceException;
-import com.mynx.myca500.commons.exceptions.ResourceNotFoundException;
-import com.mynx.myca500.commons.exceptions.UnauthorizedAccessException;
-import com.mynx.myca500.commons.exceptions.ValidationException;
+
+import com.mynx.myca500.patient_forms.exception.AccessDeniedException;
+import com.mynx.myca500.patient_forms.exception.DuplicateResourceException;
+import com.mynx.myca500.patient_forms.exception.ResourceNotFoundException;
+import com.mynx.myca500.patient_forms.exception.UnauthorizedAccessException;
+import com.mynx.myca500.patient_forms.exception.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

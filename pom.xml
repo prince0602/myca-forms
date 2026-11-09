@@ -13,29 +13,16 @@
 		<version>3.2.4</version>
 		<relativePath/>
 	</parent>
-
-
-	<repositories>
-		<repository>
-			<id>central</id>
-			<name>Central Repository</name>
-			<url>https://repo.maven.apache.org/maven2</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>nexus-myca</id>
-			<url>https://nexus.mgmt.pp.mynxsoftwares.com/repository/maven-releases/</url>
-		</repository>
-	</repositories>
+	<properties>
+		<java.version>17</java.version>
+	</properties>
 
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>com.mynx.myca500</groupId>
-				<artifactId>myca-commons</artifactId>
-				<version>3.0.4</version>
+				<groupId>software.amazon.awssdk</groupId>
+				<artifactId>bom</artifactId>
+				<version>2.29.52</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -143,15 +130,50 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
+			<scope>1.8.26</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.mynx.myca500</groupId>
-			<artifactId>myca-commons</artifactId>
-			<version>3.0.4</version>
+			<groupId>com.twilio.sdk</groupId>
+			<artifactId>twilio</artifactId>
+			<version>9.9.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
+			<version>3.2.0</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.squareup.retrofit2</groupId>
+			<artifactId>retrofit</artifactId>
+			<version>2.9.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.retrofit2</groupId>
+			<artifactId>converter-simplexml</artifactId>
+			<version>2.9.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.retrofit2</groupId>
+			<artifactId>converter-gson</artifactId>
+			<version>2.9.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>logging-interceptor</artifactId>
+			<version>4.12.0</version>
+		</dependency>
 
+		<dependency>
+			<groupId>org.carlspring.cloud.aws</groupId>
+			<artifactId>s3fs-nio</artifactId>
+			<version>1.0.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -159,13 +181,14 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-					</execution>
-				</executions>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

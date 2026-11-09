@@ -9,14 +9,15 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestControllerAdvice(assignableTypes = FormTemplateController.class)
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -25,36 +26,46 @@ public class FormsExceptionHandler {
 
     private final ObjectMapper objectMapper;
 
-    @ExceptionHandler(ApiException.class)
-    ProblemDetail handleApi(ApiException ex) {
-        return problem(ex.getStatus(), ex.getErrors().get(0), ex.getErrors());
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<List<Map<String, String>>> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        return new ResponseEntity<>(formatExceptionMsg(getErrorsMap(ex, HttpStatus.NOT_FOUND)), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    ProblemDetail handleUnreadable(HttpMessageNotReadableException ex) {
-        String message = "Malformed request body";
-        if (ex.getCause() instanceof InvalidFormatException ife) {
-            message = "Invalid value '" + ife.getValue();
-            Class<?> target = ife.getTargetType();
-            if (target != null && target.isEnum()) {
-                message += ". Accepted values: " + Arrays.stream(target.getEnumConstants())
-                        .map(e -> objectMapper.convertValue(e, String.class)).toList();
-            }
-        }
-        return problem(HttpStatus.BAD_REQUEST, message, List.of(message));
+    @ExceptionHandler(DuplicateResourceException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ResponseEntity<List<Map<String, String>>> handleDuplicateResourceException(
+            DuplicateResourceException ex) {
+        return new ResponseEntity<>(formatExceptionMsg(getErrorsMap(ex, HttpStatus.CONFLICT)), HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    ProblemDetail handleBeanValidation(MethodArgumentNotValidException ex) {
-        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
-                .map(e -> e.getField() + ": " + e.getDefaultMessage()).toList();
-        return problem(HttpStatus.BAD_REQUEST, "Validation failed", errors);
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<List<Map<String, String>>> handleAccessDeniedException(AccessDeniedException ex) {
+        return new ResponseEntity<>(formatExceptionMsg(getErrorsMap(ex, HttpStatus.FORBIDDEN)), HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
-    ProblemDetail handleOptimisticLock(ObjectOptimisticLockingFailureException ex) {
-        String msg = "This template has changed. Please reload it and re-apply your changes.";
-        return problem(HttpStatus.CONFLICT, msg, List.of(msg));
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<List<Map<String, String>>> handleUnauthorizedAccessException(UnauthorizedAccessException ex) {
+        return new ResponseEntity<>(formatExceptionMsg(getErrorsMap(ex, HttpStatus.UNAUTHORIZED)),
+                HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(ResourceCreationException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<List<Map<String, String>>> handleResourceCreationException(ResourceCreationException ex) {
+        return new ResponseEntity<>(formatExceptionMsg(getErrorsMap(ex,
+                HttpStatus.INTERNAL_SERVER_ERROR)),
+                HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<List<Map<String, String>>> handleValidationException(ValidationException ex) {
+        return new ResponseEntity<>(formatExceptionMsg(getErrorsMap(ex,
+                HttpStatus.BAD_REQUEST)),
+                HttpStatus.BAD_REQUEST);
     }
 
     private static String jsonPath(InvalidFormatException ex) {
@@ -70,5 +81,21 @@ public class FormsExceptionHandler {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(status, detail);
         pd.setProperty("errors", errors);
         return pd;
+    }
+
+    private List<Map<String, String>> formatExceptionMsg(HashMap<String, String> errors) {
+        List<Map<String, String>> errorList = new ArrayList<>();
+        errorList.add(errors);
+        return errorList;
+    }
+
+    private HashMap<String, String> getErrorsMap(RuntimeException ex, HttpStatus status) {
+        return new HashMap<String, String>() {
+            {
+                put("code", String.valueOf(status.value()));
+                put("detailedMessage", ex.getMessage());
+                put("message", status.getReasonPhrase());
+            }
+        };
     }
 }

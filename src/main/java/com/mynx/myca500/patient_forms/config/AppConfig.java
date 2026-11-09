@@ -1,15 +1,16 @@
 package com.mynx.myca500.patient_forms.config;
 
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
+
+
+
 import org.carlspring.cloud.storage.s3fs.S3FileSystemProvider;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -23,11 +24,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.carlspring.cloud.storage.s3fs.S3Factory.ACCESS_KEY;
-import static org.carlspring.cloud.storage.s3fs.S3Factory.REGION;
 import static org.carlspring.cloud.storage.s3fs.S3Factory.SECRET_KEY;
 
 @Configuration
-public class AppConfig {
+@EnableConfigurationProperties(TwilioProperties.class)
+public class AppConfig implements WebMvcConfigurer {
+
+    // Not a constant in every s3fs library, so defined here; check the key name your library expects
+    private static final String REGION = "s3fs_region";
 
     @Value("${aws.accesskey}")
     private String accessKey;
@@ -38,8 +42,7 @@ public class AppConfig {
     @Value("${aws.region}")
     private String region;
 
-    @Value("${tenant.onbording.base.url}")
-    private String tenantBaseUrl;
+
 
 
     @Bean
@@ -48,23 +51,23 @@ public class AppConfig {
     }
 
     @Bean
-    public S3FileSystemProvider S3FileSystemProvider() {
+    public S3FileSystemProvider s3FileSystemProvider() {
         return new S3FileSystemProvider();
     }
 
     @Bean
-    public RestTemplate getRestTemplate() {
+    public RestTemplate restTemplate() {
         return new RestTemplate();
     }
 
     @Bean
-    public FileSystem s3FileSystem()
-            throws IOException {
+    public FileSystem s3FileSystem() throws IOException {
         Map<String, String> env = new HashMap<>();
         env.put(ACCESS_KEY, accessKey);
         env.put(SECRET_KEY, secretKey);
         env.put(REGION, region);
-        return FileSystems.newFileSystem(URI.create("s3:///"),
+        return FileSystems.newFileSystem(
+                URI.create("s3:///"),
                 env,
                 Thread.currentThread().getContextClassLoader());
     }
@@ -76,22 +79,6 @@ public class AppConfig {
         return S3Presigner.builder()
                 .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
-                .build();
-    }
-
-    @Bean
-    public Retrofit retrofitForTenantOnboarding() {
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
-
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(loggingInterceptor)
-                .build();
-
-        return new Retrofit.Builder()
-                .baseUrl(tenantBaseUrl)
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(client)
                 .build();
     }
 }
