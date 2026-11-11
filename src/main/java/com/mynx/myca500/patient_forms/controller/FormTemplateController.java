@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,13 +31,14 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v1/form-templates")
 public class FormTemplateController {
 
     @Autowired
     private FormTemplateService service;
+
 
     @Autowired
     private SavedComponentService savedComponentService;

@@ -4,11 +4,12 @@ package com.mynx.myca500.patient_forms.controller;
 import com.mynx.myca500.patient_forms.exception.ValidationException;
 import com.mynx.myca500.patient_forms.service.S3PresignedUrlService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/presigned-forms")
 public class S3Controller {
