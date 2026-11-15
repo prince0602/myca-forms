@@ -31,4 +31,12 @@ public record FormFieldDto(
         children = children == null ? List.of() : List.copyOf(children);
     }
     private static boolean isBlank(String s) { return s == null || s.isBlank(); }
+
+    public FormFieldDto withConfig(FieldConfig newConfig) {
+        return new FormFieldDto(id, name, type, required, newConfig, children);
+    }
+
+    public FormFieldDto withChildren(List<FormFieldDto> newChildren) {
+        return new FormFieldDto(id, name, type, required, config, newChildren);
+    }
 }

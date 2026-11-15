@@ -18,4 +18,8 @@ public record FormTemplateDetailResponse(
         Instant updatedAt,
         Integer expirationHours,
         List<FormFieldDto> fields) {
+    public FormTemplateDetailResponse withFields(List<FormFieldDto> newFields) {
+        return new FormTemplateDetailResponse(id, label, description, status, version,
+                createdBy, createdAt, updatedBy, updatedAt, expirationHours, newFields);
+    }
 }

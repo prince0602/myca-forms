@@ -13,4 +13,8 @@ public record DiagramConfig(
         image = image == null ? "" : image;
         points = points == null ? List.of() : List.copyOf(points);
     }
+
+    public DiagramConfig withImage(String newImage) {
+        return new DiagramConfig(newImage, points);
+    }
 }

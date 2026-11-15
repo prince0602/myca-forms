@@ -48,5 +48,10 @@ public record FieldConfig(
     }
 
     private static String nz(String s) { return s == null ? "" : s; }
+
+    public FieldConfig withDiagram(DiagramConfig newDiagram) {
+        return new FieldConfig(document, text, maxLength, format, options,
+                columns, rowLabels, allowAddRows, rowsFrom, newDiagram);
+    }
 }
 

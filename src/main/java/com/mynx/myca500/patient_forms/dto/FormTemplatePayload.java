@@ -16,4 +16,7 @@ public record FormTemplatePayload(
         description = description == null ? "" : description;
         fields = fields == null ? List.of() : List.copyOf(fields);
     }
+    public FormTemplatePayload withFields(List<FormFieldDto> newFields) {
+        return new FormTemplatePayload(label, description, expirationHours, newFields);
+    }
 }

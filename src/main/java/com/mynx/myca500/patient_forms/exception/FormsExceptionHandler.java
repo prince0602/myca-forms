@@ -10,6 +10,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -66,6 +67,21 @@ public class FormsExceptionHandler {
         return new ResponseEntity<>(formatExceptionMsg(getErrorsMap(ex,
                 HttpStatus.BAD_REQUEST)),
                 HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MailException.class)
+    ResponseEntity<String> mailError(MailException e) {
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body("Could not send email");
+    }
+
+
+
+    @ExceptionHandler(ImageUploadException.class)
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    public ResponseEntity<List<Map<String, String>>> handleImageUploadException(ImageUploadException ex) {
+
+        return new ResponseEntity<>(formatExceptionMsg(getErrorsMap(ex, HttpStatus.BAD_GATEWAY)),
+                HttpStatus.BAD_GATEWAY);
     }
 
     private static String jsonPath(InvalidFormatException ex) {

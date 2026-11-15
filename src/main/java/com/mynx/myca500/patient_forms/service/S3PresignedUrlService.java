@@ -103,4 +103,7 @@ public class S3PresignedUrlService {
             throw new RuntimeException("Exception while generating presigned Get URL: " + e.getMessage(), e);
         }
     }
+
+    public String getBucketName() { return bucketName.replace("/", ""); }
+    public long getExpiryMinutes() { return expiry; }
 }

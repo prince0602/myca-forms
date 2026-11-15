@@ -11,10 +11,13 @@ import com.mynx.myca500.patient_forms.exception.ResourceCreationException;
 import com.mynx.myca500.patient_forms.exception.ValidationException;
 import com.mynx.myca500.patient_forms.service.FormTemplateService;
 import com.mynx.myca500.patient_forms.service.SavedComponentService;
+import com.mynx.myca500.patient_forms.service.TemplateImageFacade;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,11 +27,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @CrossOrigin(origins = "*")
@@ -38,6 +45,9 @@ public class FormTemplateController {
 
     @Autowired
     private FormTemplateService service;
+
+    @Autowired
+    private TemplateImageFacade facade;
 
 
     @Autowired
@@ -55,6 +65,8 @@ public class FormTemplateController {
         return service.get(id);
     }
 
+
+
     @PostMapping
     public ResponseEntity<FormTemplateDetailResponse> create(@Valid @RequestBody SaveFormTemplateRequest request,
                                                              HttpServletRequest httpServletRequest) {
@@ -67,6 +79,29 @@ public class FormTemplateController {
         return service.update(id, request);
     }
 
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<FormTemplateDetailResponse> create(
+            @RequestPart("request") @Valid SaveFormTemplateRequest request,
+            @RequestParam(required = false) MultiValueMap<String, MultipartFile> parts,
+            HttpServletRequest http) {
+        return ResponseEntity.ok(facade.create(request, toFileMap(parts), getUserId(http)));
+    }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public FormTemplateDetailResponse update(@PathVariable UUID id,
+                                             @RequestPart("request") @Valid SaveFormTemplateRequest request,
+                                             @RequestParam(required = false) MultiValueMap<String, MultipartFile> parts) {
+        return facade.update(id, request, toFileMap(parts));
+    }
+
+    private Map<String, MultipartFile> toFileMap(MultiValueMap<String, MultipartFile> parts) {
+        Map<String, MultipartFile> files = new LinkedHashMap<>();
+        if (parts != null) parts.forEach((ref, list) -> {
+            if (list.size() != 1) throw new ValidationException("Duplicate upload part: " + ref);
+            files.put(ref, list.get(0));
+        });
+        return files;
+    }
     @PostMapping("/{id}/activate")
     public FormTemplateDetailResponse activate(@PathVariable UUID id) {
         return service.activate(id);
