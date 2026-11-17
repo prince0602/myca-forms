@@ -3,6 +3,7 @@ package com.mynx.myca500.patient_forms.exception;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.mynx.myca500.patient_forms.controller.EmailController;
 import com.mynx.myca500.patient_forms.controller.FormTemplateController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.Ordered;
@@ -20,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RestControllerAdvice(assignableTypes = FormTemplateController.class)
+@RestControllerAdvice(assignableTypes = {FormTemplateController.class, EmailController.class})
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RequiredArgsConstructor
 public class FormsExceptionHandler {

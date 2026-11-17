@@ -2,7 +2,7 @@ package com.mynx.myca500.patient_forms.service;
 
 import com.mynx.myca500.patient_forms.dto.EmailDto;
 import com.mynx.myca500.patient_forms.dto.EmailSentResponse;
-import com.mynx.myca500.patient_forms.dto.SendFormLinkDto;
+import com.mynx.myca500.patient_forms.dto.FormLinkResponse;
 import com.mynx.myca500.patient_forms.entity.FormTemplate;
 import com.mynx.myca500.patient_forms.entity.FormTemplateVersion;
 import com.mynx.myca500.patient_forms.entity.SentForm;
@@ -21,16 +21,23 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import java.util.UUID;
 
+/**
+ * Assigns a form template to a patient: creates the {@link SentForm} pinned to the template's
+ * current version, issues a {@code FormLink} token, and optionally emails the link.
+ */
 @Service
 @RequiredArgsConstructor
-public class FormEmailService {
+public class FormAssignmentService {
 
-    private final EmailService emailService;
-    private final FormLinkService formLinkService;
-    private final SentFormRepository sentForms;
+    private static final String EMAIL_TEMPLATE = "form-request";
+
     private final FormTemplateRepository templates;
     private final FormTemplateVersionRepository versions;
+    private final SentFormRepository sentForms;
+    private final FormLinkService formLinkService;
+    private final EmailService emailService;
 
     @Value("${app.environment-url}")
     private String environmentUrl;
@@ -43,28 +50,36 @@ public class FormEmailService {
     @Value("${forms.template.max-expiration-hours:8760}")
     private int maxExpirationHours;
 
+    /**
+     * Creates a shareable link for {@code templateId}. If {@code email} is non-blank the link is
+     * also emailed; an email failure rolls the whole assignment back.
+     *
+     * @param expiresInHours optional override; falls back to the version's expirationHours, then the default
+     */
     @Transactional
-    public EmailSentResponse sendFormLink(SendFormLinkDto dto, String createdBy) {
-        FormTemplate template = templates.findById(dto.templateId())
-                .orElseThrow(() -> new ResourceNotFoundException("Template not found: " + dto.templateId()));
+    public FormLinkResponse createLink(UUID templateId, String patientId, String email,
+                                       Integer expiresInHours, String createdBy) {
+        FormTemplate template = templates.findById(templateId)
+                .orElseThrow(() -> new ResourceNotFoundException("Template not found: " + templateId));
         if (template.getStatus() != TemplateStatus.ACTIVE) {
-            throw new ValidationException("Template is not active: " + dto.templateId());
+            throw new ValidationException("Template is not active: " + templateId);
         }
 
-        // Pin the link to the template's current version on the server (B10).
+        // Pin the link to the template's current version on the server.
         int pinnedVersion = template.getCurrentVersion();
-        FormTemplateVersion version = versions.findByTemplateIdAndVersionNumber(template.getId(), pinnedVersion)
+        FormTemplateVersion version = versions.findByTemplateIdAndVersionNumber(templateId, pinnedVersion)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Template " + template.getId() + " has no version " + pinnedVersion));
+                        "Template " + templateId + " has no version " + pinnedVersion));
 
         Instant now = Instant.now();
-        Instant expiresAt = now.plus(resolveExpirationHours(dto.expiresInHours(), version), ChronoUnit.HOURS);
+        Instant expiresAt = now.plus(resolveExpirationHours(expiresInHours, version), ChronoUnit.HOURS);
+        boolean sendEmail = email != null && !email.isBlank();
 
         SentForm sf = new SentForm();
-        sf.setTemplateId(template.getId());
+        sf.setTemplateId(templateId);
         sf.setTemplateVersion(pinnedVersion);
-        sf.setPatientId(dto.patientId());
-        sf.setRecipientEmail(dto.email());
+        sf.setPatientId(patientId);
+        sf.setRecipientEmail(sendEmail ? email : null);
         sf.setStatus(SentFormStatus.SENT);
         sf.setSentAt(now);
         sf.setExpiresAt(expiresAt);
@@ -74,10 +89,18 @@ public class FormEmailService {
         String token = formLinkService.create(sf.getId(), expiresAt);
         String link = environmentUrl + "/forms/fill?token=" + token;
 
-        return emailService.send(EmailDto.fromTemplate(dto.email(), "form-request", Map.of("link", link)));
+        String messageId = null;
+        if (sendEmail) {
+            EmailSentResponse sent = emailService.send(
+                    EmailDto.fromTemplate(email, EMAIL_TEMPLATE, Map.of("link", link)));
+            messageId = sent.messageId();
+        }
+
+        return new FormLinkResponse(sf.getId().toString(), templateId.toString(), pinnedVersion,
+                token, link, expiresAt, messageId);
     }
 
-    /** Request value, then the version's expirationHours, then the configured default (B8). */
+    /** Request value, then the version's expirationHours, then the configured default. */
     private int resolveExpirationHours(Integer requested, FormTemplateVersion version) {
         int hours;
         if (requested != null) {

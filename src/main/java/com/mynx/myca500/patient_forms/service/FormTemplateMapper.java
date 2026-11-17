@@ -17,9 +17,9 @@ class FormTemplateMapper {
                 v.getExpirationHours(), v.getFields());
     }
 
-    FormTemplateListItem toListItem(FormTemplate t) {
+    FormTemplateListItem toListItem(FormTemplate t, long sentTo) {
         return new FormTemplateListItem(
                 t.getId().toString(), t.getName(), t.getDescription(), t.getStatus(), t.getCurrentVersion(),
-                t.getCreatedBy(), t.getCreatedAt(), t.getUpdatedBy(), t.getUpdatedAt(), 0L);
+                t.getCreatedBy(), t.getCreatedAt(), t.getUpdatedBy(), t.getUpdatedAt(), sentTo);
     }
 }

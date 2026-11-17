@@ -1,6 +1,8 @@
 package com.mynx.myca500.patient_forms.controller;
 
 
+import com.mynx.myca500.patient_forms.dto.FormLinkRequest;
+import com.mynx.myca500.patient_forms.dto.FormLinkResponse;
 import com.mynx.myca500.patient_forms.dto.FormTemplateDetailResponse;
 import com.mynx.myca500.patient_forms.dto.FormTemplateListItem;
 import com.mynx.myca500.patient_forms.dto.Paginated;
@@ -9,14 +11,18 @@ import com.mynx.myca500.patient_forms.dto.SavedComponentRequest;
 import com.mynx.myca500.patient_forms.dto.SavedComponentResponse;
 import com.mynx.myca500.patient_forms.exception.ResourceCreationException;
 import com.mynx.myca500.patient_forms.exception.ValidationException;
+import com.mynx.myca500.patient_forms.service.FormAssignmentService;
 import com.mynx.myca500.patient_forms.service.FormTemplateService;
 import com.mynx.myca500.patient_forms.service.SavedComponentService;
 import com.mynx.myca500.patient_forms.service.TemplateImageFacade;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -52,6 +58,9 @@ public class FormTemplateController {
 
     @Autowired
     private SavedComponentService savedComponentService;
+
+    @Autowired
+    private FormAssignmentService formAssignmentService;
 
     @GetMapping
     public Paginated<FormTemplateListItem> list(
@@ -115,6 +124,16 @@ public class FormTemplateController {
     @PostMapping("/{id}/duplicate")
     public ResponseEntity<FormTemplateDetailResponse> duplicate(@PathVariable UUID id) {
         return ResponseEntity.ok(service.duplicate(id));
+    }
+
+    /** Creates a shareable fill link for a patient, pinned to the template's current version. */
+    @PostMapping("/{id}/links")
+    public ResponseEntity<FormLinkResponse> createLink(@PathVariable UUID id,
+                                                       @Valid @RequestBody FormLinkRequest request,
+                                                       @AuthenticationPrincipal Jwt jwt) {
+        FormLinkResponse body = formAssignmentService.createLink(id, request.patientId(), request.email(),
+                request.expiresInHours(), jwt.getSubject());
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
     @PostMapping("/component")
