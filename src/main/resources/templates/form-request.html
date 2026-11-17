@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You have a form to complete</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f5f7;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f5f7;">
+    <tr>
+        <td align="center" style="padding:32px 16px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                   style="max-width:560px;background-color:#ffffff;border-radius:8px;">
+                <tr>
+                    <td style="padding:32px;">
+                        <h1 style="margin:0 0 16px;font-size:20px;line-height:28px;color:#111827;">
+                            You have a form to complete
+                        </h1>
+                        <p style="margin:0 0 24px;font-size:15px;line-height:22px;">
+                            Your care provider has asked you to fill out a form. Please use the
+                            secure link below to open and complete it.
+                        </p>
+                        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+                            <tr>
+                                <td style="border-radius:6px;background-color:#2563eb;">
+                                    <a th:href="${email.link}" href="#"
+                                       style="display:inline-block;padding:12px 24px;font-size:15px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:6px;">
+                                        Complete form
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                        <p style="margin:0 0 8px;font-size:13px;line-height:20px;color:#6b7280;">
+                            If the button doesn't work, copy and paste this link into your browser:
+                        </p>
+                        <p style="margin:0 0 24px;font-size:13px;line-height:20px;word-break:break-all;">
+                            <a th:href="${email.link}" th:text="${email.link}" href="#" style="color:#2563eb;">link</a>
+                        </p>
+                        <p style="margin:0;font-size:13px;line-height:20px;color:#6b7280;">
+                            This link is personal to you and will expire. If you weren't expecting
+                            this email, you can safely ignore it.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
