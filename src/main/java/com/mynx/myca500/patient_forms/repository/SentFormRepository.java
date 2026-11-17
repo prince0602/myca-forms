@@ -17,7 +17,6 @@ public interface SentFormRepository extends JpaRepository<SentForm, UUID> {
         long getTotal();
     }
 
-    /** One grouped query for the whole page (avoids N+1). */
     @Query("select s.templateId as templateId, count(s) as total from SentForm s "
             + "where s.templateId in :ids group by s.templateId")
     List<TemplateSentCount> countByTemplateIds(@Param("ids") Collection<UUID> ids);

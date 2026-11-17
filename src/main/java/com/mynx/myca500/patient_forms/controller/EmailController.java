@@ -7,6 +7,8 @@ import com.mynx.myca500.patient_forms.service.EmailService;
 import com.mynx.myca500.patient_forms.service.FormEmailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,8 +28,9 @@ public class EmailController {
     }
 
     @PostMapping("/send-form-link")
-    public EmailSentResponse sendFormLink(@Valid @RequestBody SendFormLinkDto request) {
-        return formEmailService.sendFormLink(request);
+    public EmailSentResponse sendFormLink(@Valid @RequestBody SendFormLinkDto request,
+                                          @AuthenticationPrincipal Jwt jwt) {
+        return formEmailService.sendFormLink(request, jwt.getSubject());
     }
 
 }
