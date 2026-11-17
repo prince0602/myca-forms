@@ -64,7 +64,9 @@ public class EmailService {
             context.setVariable("environmenturl", environmentUrl);
             String html = templateEngine.process(dto.template(), context);
             body = Body.builder().html(content(html)).build();
+
             rawContent = html;
+            log.info("email send request: raw content={}", rawContent);
             isHtml = true;
         } else {
             subject = dto.subject().trim().replaceAll("[\\r\\n]+", " ");
