@@ -11,10 +11,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,16 +22,15 @@ public class FormLinkService {
 
     private final FormLinkRepository repo;
 
-    public String create(Long formId, Long patientId, int hours) {
+    public String create(UUID sentFormId, Instant expiresAt) {
         byte[] bytes = new byte[32];
         new SecureRandom().nextBytes(bytes);
         String token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
 
         FormLink link = new FormLink();
         link.setTokenHash(hash(token));
-        link.setFormId(formId);
-        link.setPatientId(patientId);
-        link.setExpiresAt(Instant.now().plus(hours, ChronoUnit.HOURS));
+        link.setSentFormId(sentFormId);
+        link.setExpiresAt(expiresAt);
         repo.save(link);
         return token;
     }
@@ -57,4 +56,5 @@ public class FormLinkService {
             throw new IllegalStateException(e);
         }
     }
+
 }
