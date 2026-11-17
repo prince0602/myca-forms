@@ -35,6 +35,11 @@ public class EmailService {
 
     private final SesClient sesClient;
     private final TemplateEngine templateEngine;
+    private final SmtpEmailSender smtpEmailSender;
+
+    /** "smtp" (default) sends via SES SMTP; "ses" uses the SES SDK client. */
+    @Value("${app.email.provider:smtp}")
+    private String provider;
 
     @Value("${app.email.from}")
     private String from;
@@ -43,8 +48,11 @@ public class EmailService {
     private String environmentUrl;
 
     public EmailSentResponse send(EmailDto dto) {
+        log.info("email send request: template={}, recipients={}", dto.template(), dto.to().length());
         String subject;
         Body body;
+        String rawContent;
+        boolean isHtml;
 
         if (dto.template() != null) {
             subject = TEMPLATE_SUBJECTS.get(dto.template());
@@ -56,9 +64,20 @@ public class EmailService {
             context.setVariable("environmenturl", environmentUrl);
             String html = templateEngine.process(dto.template(), context);
             body = Body.builder().html(content(html)).build();
+            rawContent = html;
+            isHtml = true;
         } else {
             subject = dto.subject().trim().replaceAll("[\\r\\n]+", " ");
             body = Body.builder().text(content(dto.body())).build();
+            rawContent = dto.body();
+            isHtml = false;
+        }
+
+        if ("smtp".equalsIgnoreCase(provider)) {
+            String messageId = smtpEmailSender.send(from, dto.to(), subject, rawContent, isHtml);
+            log.info("Email sent: template={}, recipients={}, messageId={}",
+                    dto.template(), dto.to().length(), messageId);
+            return new EmailSentResponse(messageId);
         }
 
         SendEmailRequest request = SendEmailRequest.builder()
