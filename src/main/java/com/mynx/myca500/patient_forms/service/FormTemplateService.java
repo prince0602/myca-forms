@@ -25,7 +25,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,15 +55,26 @@ public class FormTemplateService {
 
         Page<FormTemplate> result = templates.findAll(pageable);
 
+        // One grouped query for the whole page; templates never sent are absent and count as 0.
+        Map<UUID, Long> sentCounts = sentCounts(result.getContent());
+
         List<FormTemplateListItem> items = result.getContent()
                 .stream()
-                .map(mapper::toListItem)
+                .map(t -> mapper.toListItem(t, sentCounts.getOrDefault(t.getId(), 0L)))
                 .toList();
 
         return new Paginated<>(items, result.getTotalElements());
 
     }
 
+
+    private Map<UUID, Long> sentCounts(List<FormTemplate> page) {
+        if (page.isEmpty()) return Map.of();
+        List<UUID> ids = page.stream().map(FormTemplate::getId).toList();
+        return sentForms.countByTemplateIds(ids).stream()
+                .collect(Collectors.toMap(SentFormRepository.TemplateSentCount::getTemplateId,
+                        SentFormRepository.TemplateSentCount::getTotal));
+    }
 
     @Transactional(readOnly = true)
     public FormTemplateDetailResponse get(UUID id) {
