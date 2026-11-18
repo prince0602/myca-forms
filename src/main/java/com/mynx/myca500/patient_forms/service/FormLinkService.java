@@ -55,7 +55,7 @@ public class FormLinkService {
                 .orElseThrow(() -> new FormLinkException(Code.LINK_INVALID));
         Instant now = Instant.now();
         if (link.getRevokedAt() != null) throw new FormLinkException(Code.LINK_REVOKED);
-        // A null expiresAt means no expiry; createLink always sets one today.
+
         if (link.getExpiresAt() != null && !now.isBefore(link.getExpiresAt())) {
             throw new FormLinkException(Code.LINK_EXPIRED);
         }

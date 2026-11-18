@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 public class FormLinkException extends RuntimeException {
 
     public enum Code {
+        TOKEN_MISSING(HttpStatus.BAD_REQUEST,"Token missing"),
         LINK_INVALID(HttpStatus.NOT_FOUND, "This link is not valid"),
         LINK_EXPIRED(HttpStatus.GONE, "This link has expired"),
         LINK_REVOKED(HttpStatus.GONE, "This link has been revoked"),
