@@ -26,6 +26,7 @@ public class AnswerValidator {
     static final int MAX_TEXT_AREA = 10_000;
     static final int MAX_TABLE_ROWS = 100;
     static final int MAX_UPLOAD_KEY = 1_024;
+    static final String ROW_KEY = "key";
 
     private static final Pattern PHONE = Pattern.compile("^\\+?[0-9 ()\\-]{6,20}$");
     private static final Pattern EMAIL = Pattern.compile("^[^\\s@]{1,64}@[^\\s@]{1,255}\\.[^\\s@]{2,63}$");
@@ -176,8 +177,12 @@ public class AnswerValidator {
             if (!(row instanceof Map<?, ?> cells)) throw new InvalidAnswer("INVALID_TABLE");
             Map<String, Object> cleanRow = new LinkedHashMap<>();
             for (Map.Entry<?, ?> cell : cells.entrySet()) {
-                ColumnType type = rule.columns().get(String.valueOf(cell.getKey()));
-                if (type == null) throw new InvalidAnswer("UNKNOWN_COLUMN");
+                String columnId = String.valueOf(cell.getKey());
+                ColumnType type = rule.columns().get(columnId);
+                if (type == null) {
+                    if (ROW_KEY.equals(columnId)) continue;
+                    throw new InvalidAnswer("UNKNOWN_COLUMN");
+                }
                 Object value = blankToNull(cell.getValue());
                 if (value != null) cleanRow.put((String) cell.getKey(), cell(type, value));
             }
