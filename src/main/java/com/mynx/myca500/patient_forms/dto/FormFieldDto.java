@@ -14,7 +14,8 @@ public record FormFieldDto(
         @Size(max = 100) String id,
         @Size(max = 100) String name,
         @NotNull FieldType type,
-//        @Size(max = 500) String label,
+//       @Size(max = 500) String label,
+        //String selectedValue;
         boolean required,
         @Valid FieldConfig config,
 //        Map<String, Object> style,

@@ -9,11 +9,14 @@ import com.mynx.myca500.patient_forms.dto.Paginated;
 import com.mynx.myca500.patient_forms.dto.SaveFormTemplateRequest;
 import com.mynx.myca500.patient_forms.dto.SavedComponentRequest;
 import com.mynx.myca500.patient_forms.dto.SavedComponentResponse;
+import com.mynx.myca500.patient_forms.dto.SentFormListItem;
+import com.mynx.myca500.patient_forms.dto.SentFormPreview;
 import com.mynx.myca500.patient_forms.exception.ResourceCreationException;
 import com.mynx.myca500.patient_forms.exception.ValidationException;
 import com.mynx.myca500.patient_forms.service.FormAssignmentService;
 import com.mynx.myca500.patient_forms.service.FormTemplateService;
 import com.mynx.myca500.patient_forms.service.SavedComponentService;
+import com.mynx.myca500.patient_forms.service.SentFormQueryService;
 import com.mynx.myca500.patient_forms.service.TemplateImageFacade;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -61,6 +64,9 @@ public class FormTemplateController {
 
     @Autowired
     private FormAssignmentService formAssignmentService;
+
+    @Autowired
+    private SentFormQueryService sentFormQueryService;
 
     @GetMapping
     public Paginated<FormTemplateListItem> list(
@@ -134,6 +140,21 @@ public class FormTemplateController {
         FormLinkResponse body = formAssignmentService.createLink(id, request.patientId(), request.email(),
                 request.expiresInHours(), jwt.getSubject());
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
+    }
+
+
+    @GetMapping("/{id}/sent-forms")
+    public Paginated<SentFormListItem> sentForms(@PathVariable UUID id,
+                                                 @RequestParam(required = false) String patientId,
+                                                 @RequestParam(defaultValue = "1") int page,
+                                                 @RequestParam(defaultValue = "20") int size) {
+        return sentFormQueryService.list(id, patientId, page, size);
+    }
+
+
+    @GetMapping("/{id}/sent-forms/{sentFormId}")
+    public SentFormPreview sentFormPreview(@PathVariable UUID id, @PathVariable UUID sentFormId) {
+        return sentFormQueryService.preview(id, sentFormId);
     }
 
     @PostMapping("/component")

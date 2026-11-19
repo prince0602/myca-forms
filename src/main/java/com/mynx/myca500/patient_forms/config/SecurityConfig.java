@@ -1,5 +1,7 @@
 package com.mynx.myca500.patient_forms.config;
 
+
+
 import com.mynx.myca500.patient_forms.service.KeycloakRoleConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +35,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/error", "/api/auth/validate-token").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/public/forms").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/public/forms/submit", "/api/public/forms/uploads").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/public/forms/draft").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth -> oauth
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));

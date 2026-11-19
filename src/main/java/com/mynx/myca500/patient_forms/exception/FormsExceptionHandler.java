@@ -70,6 +70,12 @@ public class FormsExceptionHandler {
                 HttpStatus.BAD_REQUEST);
     }
 
+    /** Thrown by services with its own status (404 not found, 409 name in use, 400 template errors). */
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<List<Map<String, String>>> handleApiException(ApiException ex) {
+        return new ResponseEntity<>(formatExceptionMsg(getErrorsMap(ex, ex.getStatus())), ex.getStatus());
+    }
+
     @ExceptionHandler(MailException.class)
     ResponseEntity<String> mailError(MailException e) {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body("Could not send email");
