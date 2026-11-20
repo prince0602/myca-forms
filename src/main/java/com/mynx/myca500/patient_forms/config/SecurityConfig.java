@@ -33,7 +33,6 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/error", "/api/auth/validate-token").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/public/forms").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/public/forms/submit", "/api/public/forms/uploads").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/public/forms/draft").permitAll()
