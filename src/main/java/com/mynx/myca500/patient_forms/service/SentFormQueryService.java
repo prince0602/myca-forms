@@ -36,6 +36,7 @@ public class SentFormQueryService {
     private final FormTemplateVersionRepository versions;
     private final SentFormRepository sentForms;
     private final FormResponseRepository responses;
+    private final ImageUrlResolver imageUrls;
 
 
     public Paginated<SentFormListItem> list(UUID templateId, String patientId, int page, int size) {
@@ -73,7 +74,7 @@ public class SentFormQueryService {
                 ? responses.findBySentFormId(form.getId())
                 : Optional.empty();
 
-        List<FormFieldDto> fields = version.getFields() == null ? List.of() : version.getFields();
+        List<FormFieldDto> fields = imageUrls.resolve(version.getFields() == null ? List.of() : version.getFields());
         return new SentFormPreview(
                 toItem(form, Instant.now()),
                 version.getLabel(),

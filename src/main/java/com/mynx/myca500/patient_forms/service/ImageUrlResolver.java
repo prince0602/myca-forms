@@ -2,6 +2,7 @@ package com.mynx.myca500.patient_forms.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.mynx.myca500.patient_forms.config.ImageProperties;
 import com.mynx.myca500.patient_forms.dto.FormFieldDto;
 import com.mynx.myca500.patient_forms.helper.FormFieldTraverser;
 import com.mynx.myca500.patient_forms.validation.S3Constants;
@@ -18,14 +19,17 @@ public class ImageUrlResolver {
 
     private final S3PresignedUrlService presignService;
     private final FormFieldTraverser traverser;
+    private final Duration ttl;
     private final Cache<String, String> cache;
 
-    public ImageUrlResolver(S3PresignedUrlService presignService, FormFieldTraverser traverser) {
+    public ImageUrlResolver(S3PresignedUrlService presignService, FormFieldTraverser traverser,
+                            ImageProperties props) {
         this.presignService = presignService;
         this.traverser = traverser;
+        this.ttl = props.presignTtl();
         this.cache = Caffeine.newBuilder()
-                .maximumSize(10_000)
-                .expireAfterWrite(Duration.ofMinutes(presignService.getExpiryMinutes()).dividedBy(2))
+                .maximumSize(props.cacheMaxEntries())
+                .expireAfterWrite(ttl.dividedBy(2))
                 .build();
     }
 
@@ -37,8 +41,8 @@ public class ImageUrlResolver {
         for (String name : names) {
             if (!S3Constants.isSafeFileName(name)) { urls.put(name, null); continue; }
             urls.put(name, cache.get(name,
-                    n -> presignService.createPreSignedGetUrl(S3Constants.FORMS_COMMON_FOLDER, n)));
+                    n -> presignService.createPreSignedGetUrl(S3Constants.FORMS_COMMON_FOLDER, n, ttl)));
         }
-        return traverser.mapImages(fields, n -> urls.get(n));
+        return traverser.mapImages(fields, urls::get);
     }
 }

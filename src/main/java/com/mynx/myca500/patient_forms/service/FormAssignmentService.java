@@ -5,6 +5,7 @@ import com.mynx.myca500.patient_forms.dto.EmailSentResponse;
 import com.mynx.myca500.patient_forms.dto.FormLinkResponse;
 import com.mynx.myca500.patient_forms.entity.FormTemplate;
 import com.mynx.myca500.patient_forms.entity.FormTemplateVersion;
+import com.mynx.myca500.patient_forms.entity.Patient;
 import com.mynx.myca500.patient_forms.entity.SentForm;
 import com.mynx.myca500.patient_forms.enums.SentFormStatus;
 import com.mynx.myca500.patient_forms.enums.TemplateStatus;
@@ -12,6 +13,7 @@ import com.mynx.myca500.patient_forms.exception.ResourceNotFoundException;
 import com.mynx.myca500.patient_forms.exception.ValidationException;
 import com.mynx.myca500.patient_forms.repository.FormTemplateRepository;
 import com.mynx.myca500.patient_forms.repository.FormTemplateVersionRepository;
+import com.mynx.myca500.patient_forms.repository.PatientRepository;
 import com.mynx.myca500.patient_forms.repository.SentFormRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,7 @@ public class FormAssignmentService {
     private final SentFormRepository sentForms;
     private final FormLinkService formLinkService;
     private final EmailService emailService;
+    private final PatientRepository patients;
 
     @Value("${app.environment-url}")
     private String environmentUrl;
@@ -100,7 +103,18 @@ public class FormAssignmentService {
                 token, link, expiresAt, messageId);
     }
 
-    /** Request value, then the version's expirationHours, then the configured default. */
+
+    public String resolveRecipientEmail(String patientId, String email) {
+        if (email != null && !email.isBlank()) {
+            return email;
+        }
+        return PatientService.parseId(patientId)
+                .flatMap(patients::findById)
+                .map(Patient::getEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found: " + patientId));
+    }
+
+
     private int resolveExpirationHours(Integer requested, FormTemplateVersion version) {
         int hours;
         if (requested != null) {

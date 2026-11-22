@@ -13,6 +13,7 @@ public enum ErrorCode {
     NOT_WORKSPACE_OWNER(HttpStatus.FORBIDDEN, "Only the workspace owner can do this."),
     WORKSPACE_NOT_FOUND(HttpStatus.NOT_FOUND, "Workspace not found."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found."),
+    PATIENT_NOT_FOUND(HttpStatus.NOT_FOUND, "Patient not found."),
     EMAIL_NOT_VERIFIED(HttpStatus.FORBIDDEN, "Email address is not verified."),
     VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "Request validation failed."),
     MALFORMED_BODY(HttpStatus.BAD_REQUEST, "Request body is malformed or contains invalid values."),
@@ -24,6 +25,7 @@ public enum ErrorCode {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Unauthorized."),
     RESOURCE_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Could not create the resource."),
     IMAGE_UPLOAD_FAILED(HttpStatus.BAD_GATEWAY, "Image upload failed."),
+    PAYLOAD_TOO_LARGE(HttpStatus.PAYLOAD_TOO_LARGE, "Upload exceeds the maximum allowed size (5 MB per image)."),
     EMAIL_SEND_FAILED(HttpStatus.BAD_GATEWAY, "Could not send email");
 
     private final HttpStatus status;

@@ -52,6 +52,8 @@ import java.util.UUID;
 @RequestMapping("/api/v1/form-templates")
 public class FormTemplateController {
 
+    private static final String REQUEST_PART = "request";
+
     @Autowired
     private FormTemplateService service;
 
@@ -77,7 +79,7 @@ public class FormTemplateController {
 
     @GetMapping("/{id}")
     public FormTemplateDetailResponse get(@PathVariable UUID id) {
-        return service.get(id);
+        return facade.get(id);
     }
 
 
@@ -86,17 +88,17 @@ public class FormTemplateController {
     public ResponseEntity<FormTemplateDetailResponse> create(@Valid @RequestBody SaveFormTemplateRequest request,
                                                              HttpServletRequest httpServletRequest) {
        String userId= getUserId(httpServletRequest);
-        return ResponseEntity.ok(service.create(request,userId));
+        return ResponseEntity.ok(facade.create(request, Map.of(), userId));
     }
 
     @PutMapping("/{id}")
     public FormTemplateDetailResponse update(@PathVariable UUID id, @Valid @RequestBody SaveFormTemplateRequest request) {
-        return service.update(id, request);
+        return facade.update(id, request, Map.of());
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<FormTemplateDetailResponse> create(
-            @RequestPart("request") @Valid SaveFormTemplateRequest request,
+            @RequestPart(REQUEST_PART) @Valid SaveFormTemplateRequest request,
             @RequestParam(required = false) MultiValueMap<String, MultipartFile> parts,
             HttpServletRequest http) {
         return ResponseEntity.ok(facade.create(request, toFileMap(parts), getUserId(http)));
@@ -104,14 +106,16 @@ public class FormTemplateController {
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public FormTemplateDetailResponse update(@PathVariable UUID id,
-                                             @RequestPart("request") @Valid SaveFormTemplateRequest request,
+                                             @RequestPart(REQUEST_PART) @Valid SaveFormTemplateRequest request,
                                              @RequestParam(required = false) MultiValueMap<String, MultipartFile> parts) {
         return facade.update(id, request, toFileMap(parts));
     }
 
+
     private Map<String, MultipartFile> toFileMap(MultiValueMap<String, MultipartFile> parts) {
         Map<String, MultipartFile> files = new LinkedHashMap<>();
         if (parts != null) parts.forEach((ref, list) -> {
+            if (REQUEST_PART.equals(ref)) return;
             if (list.size() != 1) throw new ValidationException("Duplicate upload part: " + ref);
             files.put(ref, list.get(0));
         });
@@ -119,17 +123,17 @@ public class FormTemplateController {
     }
     @PostMapping("/{id}/activate")
     public FormTemplateDetailResponse activate(@PathVariable UUID id) {
-        return service.activate(id);
+        return facade.render(service.activate(id));
     }
 
     @PostMapping("/{id}/deactivate")
     public FormTemplateDetailResponse deactivate(@PathVariable UUID id) {
-        return service.deactivate(id);
+        return facade.render(service.deactivate(id));
     }
 
     @PostMapping("/{id}/duplicate")
     public ResponseEntity<FormTemplateDetailResponse> duplicate(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.duplicate(id));
+        return ResponseEntity.ok(facade.render(service.duplicate(id)));
     }
 
     /** Creates a shareable fill link for a patient, pinned to the template's current version. */

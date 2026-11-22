@@ -57,6 +57,7 @@ public class PublicFormService {
     private final S3PresignedUrlService presigner;
     private final TransactionTemplate tx;
     private final ApplicationEventPublisher events;
+    private final ImageUrlResolver imageUrls;
 
 
     @Transactional
@@ -88,7 +89,7 @@ public class PublicFormService {
                 access.submitted(),
                 link.getExpiresAt() != null ? link.getExpiresAt() : form.getExpiresAt(),
                 form.getSubmittedAt(),
-                fieldsOf(version),
+                imageUrls.resolve(fieldsOf(version)),
                 saved.map(FormResponse::getAnswers).orElseGet(Map::of),
                 saved.map(FormResponse::getLockVersion).orElse(null));
     }

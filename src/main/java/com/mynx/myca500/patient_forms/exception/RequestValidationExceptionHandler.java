@@ -6,6 +6,7 @@ import com.mynx.myca500.patient_forms.controller.FormTemplateController;
 import com.mynx.myca500.patient_forms.controller.MeController;
 import com.mynx.myca500.patient_forms.controller.MemberController;
 import com.mynx.myca500.patient_forms.controller.OnboardingController;
+import com.mynx.myca500.patient_forms.controller.PatientController;
 import com.mynx.myca500.patient_forms.controller.WorkspaceController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -20,7 +21,7 @@ import java.util.Map;
 
 @RestControllerAdvice(assignableTypes = {MeController.class, OnboardingController.class,
         WorkspaceController.class, MemberController.class,
-        FormTemplateController.class, EmailController.class})
+        FormTemplateController.class, EmailController.class, PatientController.class})
 public class RequestValidationExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

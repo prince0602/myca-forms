@@ -33,8 +33,9 @@ public class EmailController {
     @PostMapping("/send-form-link")
     public EmailSentResponse sendFormLink(@Valid @RequestBody SendFormLinkDto request,
                                           @AuthenticationPrincipal Jwt jwt) {
+        String email = formAssignmentService.resolveRecipientEmail(request.patientId(), request.email());
         FormLinkResponse created = formAssignmentService.createLink(request.templateId(), request.patientId(),
-                request.email(), request.expiresInHours(), jwt.getSubject());
+                email, request.expiresInHours(), jwt.getSubject());
         return new EmailSentResponse(created.emailMessageId());
     }
 

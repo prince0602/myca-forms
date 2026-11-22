@@ -4,6 +4,7 @@ import com.mynx.myca500.patient_forms.controller.EmailController;
 import com.mynx.myca500.patient_forms.controller.FormTemplateController;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -59,6 +60,12 @@ public class FormsExceptionHandler {
             default -> ErrorCode.VALIDATION_FAILED; // ApiException.badRequest (template errors)
         };
         return ApiErrorResponses.of(code, ex.getMessage(), null);
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<List<Map<String, Object>>> handleOptimisticLock(OptimisticLockingFailureException ex) {
+        return ApiErrorResponses.of(ErrorCode.DUPLICATE_RESOURCE,
+                "This template has changed. Please reload it and re-apply your changes.", null);
     }
 
     @ExceptionHandler(MailException.class)

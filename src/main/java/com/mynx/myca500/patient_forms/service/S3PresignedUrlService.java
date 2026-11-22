@@ -70,12 +70,16 @@ public class S3PresignedUrlService {
     }
 
     public String createPreSignedGetUrl(String folder, String fileName) {
+        return createPreSignedGetUrl(folder, fileName, Duration.ofMinutes(expiry));
+    }
+
+    public String createPreSignedGetUrl(String folder, String fileName, Duration ttl) {
         try {
             log.info("Inside createPreSignedGetUrl()");
             String sanitizedBucketName = bucketName.replace("/", "");
 
             GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-                    .signatureDuration(Duration.ofMinutes(expiry))
+                    .signatureDuration(ttl)
                     .getObjectRequest(builder -> builder
                             .bucket(sanitizedBucketName)
                             .key(folder + "/" + fileName))

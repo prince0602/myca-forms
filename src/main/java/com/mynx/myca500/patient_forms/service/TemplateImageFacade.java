@@ -5,6 +5,7 @@ import com.mynx.myca500.patient_forms.dto.FormTemplateDetailResponse;
 import com.mynx.myca500.patient_forms.dto.SaveFormTemplateRequest;
 import com.mynx.myca500.patient_forms.exception.ValidationException;
 import com.mynx.myca500.patient_forms.helper.FormFieldTraverser;
+import com.mynx.myca500.patient_forms.validation.FormTemplateValidator;
 import com.mynx.myca500.patient_forms.validation.S3Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class TemplateImageFacade {
     private final TemplateImageUploader uploader;
     private final ImageUrlResolver resolver;
     private final FormFieldTraverser traverser;
+    private final FormTemplateValidator validator;
 
     private record Prepared(SaveFormTemplateRequest request, Collection<String> newFiles) {}
 
@@ -61,7 +63,8 @@ public class TemplateImageFacade {
     public FormTemplateDetailResponse get(UUID id)        { return render(service.get(id)); }
 
 
-    private FormTemplateDetailResponse render(FormTemplateDetailResponse r) {
+    /** Replaces stored image file names with presigned GET URLs so the client can render them. */
+    public FormTemplateDetailResponse render(FormTemplateDetailResponse r) {
         return r.withFields(resolver.resolve(r.fields()));
     }
 
@@ -79,6 +82,9 @@ public class TemplateImageFacade {
         for (String ref : refs) {
             if (!files.containsKey(ref)) existing.put(ref, normalizeExisting(ref));
         }
+
+        // Reject an invalid template before spending S3 uploads on it.
+        if (!files.isEmpty()) validator.validateAndNormalize(req.payload());
 
         Map<String, String> uploaded = files.isEmpty() ? Map.of() : uploader.uploadAll(files);
         try {
