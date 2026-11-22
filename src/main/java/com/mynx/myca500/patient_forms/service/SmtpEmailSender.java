@@ -12,10 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 
-/**
- * Sends email through the Amazon SES SMTP interface (STARTTLS, port 587)
- * using the spring.mail.* settings.
- */
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -23,10 +20,6 @@ public class SmtpEmailSender {
 
     private final JavaMailSender mailSender;
 
-    /**
-     * @param html true if {@code content} is HTML, false for plain text
-     * @return the Message-ID header of the sent message
-     */
     public String send(String from, String to, String subject, String content, boolean html) {
         try {
             MimeMessage message = mailSender.createMimeMessage();

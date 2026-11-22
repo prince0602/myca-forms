@@ -11,11 +11,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Keycloak puts roles in realm_access.roles and resource_access.<client>.roles.
- * Each becomes ROLE_<name>, so @PreAuthorize("hasRole('ADMIN')") works.
- * Scopes (SCOPE_xxx) are kept as well.
- */
 public class KeycloakRoleConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
 
     private final JwtGrantedAuthoritiesConverter scopeConverter = new JwtGrantedAuthoritiesConverter();

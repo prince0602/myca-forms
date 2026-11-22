@@ -56,7 +56,6 @@ public class PublicFormController {
         return guarded(ip, () -> service.submit(token, body));
     }
 
-    /** Autosave: replaces the draft answers. Uses the general request budget (clients should debounce). */
     @PutMapping(path = "/draft", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> saveDraft(
             @RequestHeader(value = TOKEN_HEADER, required = false) String token,

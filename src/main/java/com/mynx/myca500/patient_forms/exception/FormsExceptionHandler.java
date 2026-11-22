@@ -1,124 +1,68 @@
 package com.mynx.myca500.patient_forms.exception;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.mynx.myca500.patient_forms.controller.EmailController;
 import com.mynx.myca500.patient_forms.controller.FormTemplateController;
-import lombok.RequiredArgsConstructor;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice(assignableTypes = {FormTemplateController.class, EmailController.class})
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@RequiredArgsConstructor
 public class FormsExceptionHandler {
 
-    private final ObjectMapper objectMapper;
-
     @ExceptionHandler(ResourceNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<List<Map<String, String>>> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        return new ResponseEntity<>(formatExceptionMsg(getErrorsMap(ex, HttpStatus.NOT_FOUND)), HttpStatus.NOT_FOUND);
+    public ResponseEntity<List<Map<String, Object>>> handleResourceNotFound(ResourceNotFoundException ex) {
+        return ApiErrorResponses.of(ErrorCode.RESOURCE_NOT_FOUND, ex.getMessage(), null);
     }
 
     @ExceptionHandler(DuplicateResourceException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ResponseEntity<List<Map<String, String>>> handleDuplicateResourceException(
-            DuplicateResourceException ex) {
-        return new ResponseEntity<>(formatExceptionMsg(getErrorsMap(ex, HttpStatus.CONFLICT)), HttpStatus.CONFLICT);
+    public ResponseEntity<List<Map<String, Object>>> handleDuplicateResource(DuplicateResourceException ex) {
+        return ApiErrorResponses.of(ErrorCode.DUPLICATE_RESOURCE, ex.getMessage(), null);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ResponseEntity<List<Map<String, String>>> handleAccessDeniedException(AccessDeniedException ex) {
-        return new ResponseEntity<>(formatExceptionMsg(getErrorsMap(ex, HttpStatus.FORBIDDEN)), HttpStatus.FORBIDDEN);
+    public ResponseEntity<List<Map<String, Object>>> handleAccessDenied(AccessDeniedException ex) {
+        return ApiErrorResponses.of(ErrorCode.ACCESS_DENIED, ex.getMessage(), null);
     }
 
     @ExceptionHandler(UnauthorizedAccessException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ResponseEntity<List<Map<String, String>>> handleUnauthorizedAccessException(UnauthorizedAccessException ex) {
-        return new ResponseEntity<>(formatExceptionMsg(getErrorsMap(ex, HttpStatus.UNAUTHORIZED)),
-                HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<List<Map<String, Object>>> handleUnauthorizedAccess(UnauthorizedAccessException ex) {
+        return ApiErrorResponses.of(ErrorCode.UNAUTHORIZED, ex.getMessage(), null);
     }
 
     @ExceptionHandler(ResourceCreationException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<List<Map<String, String>>> handleResourceCreationException(ResourceCreationException ex) {
-        return new ResponseEntity<>(formatExceptionMsg(getErrorsMap(ex,
-                HttpStatus.INTERNAL_SERVER_ERROR)),
-                HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<List<Map<String, Object>>> handleResourceCreation(ResourceCreationException ex) {
+        return ApiErrorResponses.of(ErrorCode.RESOURCE_CREATION_FAILED, ex.getMessage(), null);
     }
 
     @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<List<Map<String, String>>> handleValidationException(ValidationException ex) {
-        return new ResponseEntity<>(formatExceptionMsg(getErrorsMap(ex,
-                HttpStatus.BAD_REQUEST)),
-                HttpStatus.BAD_REQUEST);
+    public ResponseEntity<List<Map<String, Object>>> handleValidation(ValidationException ex) {
+        return ApiErrorResponses.of(ErrorCode.VALIDATION_FAILED, ex.getMessage(), null);
     }
 
-    /** Thrown by services with its own status (404 not found, 409 name in use, 400 template errors). */
+    @ExceptionHandler(ImageUploadException.class)
+    public ResponseEntity<List<Map<String, Object>>> handleImageUpload(ImageUploadException ex) {
+        return ApiErrorResponses.of(ErrorCode.IMAGE_UPLOAD_FAILED, ex.getMessage(), null);
+    }
+
     @ExceptionHandler(ApiException.class)
-    public ResponseEntity<List<Map<String, String>>> handleApiException(ApiException ex) {
-        return new ResponseEntity<>(formatExceptionMsg(getErrorsMap(ex, ex.getStatus())), ex.getStatus());
+    public ResponseEntity<List<Map<String, Object>>> handleApiException(ApiException ex) {
+        ErrorCode code = switch (ex.getStatus()) {
+            case NOT_FOUND -> ErrorCode.RESOURCE_NOT_FOUND;
+            case CONFLICT -> ErrorCode.DUPLICATE_RESOURCE;
+            default -> ErrorCode.VALIDATION_FAILED; // ApiException.badRequest (template errors)
+        };
+        return ApiErrorResponses.of(code, ex.getMessage(), null);
     }
 
     @ExceptionHandler(MailException.class)
-    ResponseEntity<String> mailError(MailException e) {
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body("Could not send email");
-    }
-
-
-
-    @ExceptionHandler(ImageUploadException.class)
-    @ResponseStatus(HttpStatus.BAD_GATEWAY)
-    public ResponseEntity<List<Map<String, String>>> handleImageUploadException(ImageUploadException ex) {
-
-        return new ResponseEntity<>(formatExceptionMsg(getErrorsMap(ex, HttpStatus.BAD_GATEWAY)),
-                HttpStatus.BAD_GATEWAY);
-    }
-
-    private static String jsonPath(InvalidFormatException ex) {
-        StringBuilder sb = new StringBuilder();
-        for (JsonMappingException.Reference ref : ex.getPath()) {
-            if (ref.getFieldName() != null) sb.append(sb.length() > 0 ? "." : "").append(ref.getFieldName());
-            else sb.append("[").append(ref.getIndex()).append("]");
-        }
-        return sb.toString();
-    }
-
-    private static ProblemDetail problem(HttpStatus status, String detail, List<String> errors) {
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(status, detail);
-        pd.setProperty("errors", errors);
-        return pd;
-    }
-
-    private List<Map<String, String>> formatExceptionMsg(HashMap<String, String> errors) {
-        List<Map<String, String>> errorList = new ArrayList<>();
-        errorList.add(errors);
-        return errorList;
-    }
-
-    private HashMap<String, String> getErrorsMap(RuntimeException ex, HttpStatus status) {
-        return new HashMap<String, String>() {
-            {
-                put("code", String.valueOf(status.value()));
-                put("detailedMessage", ex.getMessage());
-                put("message", status.getReasonPhrase());
-            }
-        };
+    public ResponseEntity<List<Map<String, Object>>> handleMail(MailException ex) {
+        return ApiErrorResponses.of(ErrorCode.EMAIL_SEND_FAILED);
     }
 }
