@@ -32,6 +32,8 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/reference/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/compliance/baa/current").permitAll()
+                        // Temporary: BAA PDF served from classpath static/legal until the S3 bucket exists
+                        .requestMatchers(HttpMethod.GET, "/legal/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/invitations/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/public/forms").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/public/forms/submit", "/api/public/forms/uploads").permitAll()
