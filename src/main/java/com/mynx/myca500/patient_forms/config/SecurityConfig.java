@@ -34,6 +34,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/compliance/baa/current").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/invitations/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/public/forms").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/public/forms/submit", "/api/public/forms/uploads").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/public/forms/draft").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth -> oauth
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(new KeycloakJwtAuthenticationConverter())));

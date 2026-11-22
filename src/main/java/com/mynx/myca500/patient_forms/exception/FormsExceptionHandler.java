@@ -51,6 +51,17 @@ public class FormsExceptionHandler {
         return ApiErrorResponses.of(ErrorCode.IMAGE_UPLOAD_FAILED, ex.getMessage(), null);
     }
 
+    /** Thrown by services with its own status (404 not found, 409 name in use, 400 template errors). */
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<List<Map<String, Object>>> handleApiException(ApiException ex) {
+        ErrorCode code = switch (ex.getStatus()) {
+            case NOT_FOUND -> ErrorCode.RESOURCE_NOT_FOUND;
+            case CONFLICT -> ErrorCode.DUPLICATE_RESOURCE;
+            default -> ErrorCode.VALIDATION_FAILED; // ApiException.badRequest (template errors)
+        };
+        return ApiErrorResponses.of(code, ex.getMessage(), null);
+    }
+
     @ExceptionHandler(MailException.class)
     public ResponseEntity<List<Map<String, Object>>> handleMail(MailException ex) {
         // Never echo the mail exception text: it can contain recipient addresses.

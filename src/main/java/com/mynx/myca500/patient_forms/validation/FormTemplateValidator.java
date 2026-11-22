@@ -3,7 +3,9 @@ package com.mynx.myca500.patient_forms.validation;
 
 import com.mynx.myca500.patient_forms.dto.FormFieldDto;
 import com.mynx.myca500.patient_forms.dto.FormTemplatePayload;
+import com.mynx.myca500.patient_forms.enums.ColumnType;
 import com.mynx.myca500.patient_forms.enums.FieldType;
+import com.mynx.myca500.patient_forms.enums.InputFormat;
 import com.mynx.myca500.patient_forms.exception.ApiException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -69,5 +72,18 @@ public class FormTemplateValidator {
 
     private void validateOptions(FormFieldDto f, List<String> errors) {
 
+    }
+
+    public record FieldRule(
+            String id,
+            FieldType type,
+            boolean required,
+            InputFormat format,
+            Integer maxLength,
+            Set<String> optionKeys,
+            Map<String, ColumnType> columns,
+            int fixedRows,
+            boolean allowAddRows,
+            Set<String> pointIds) {
     }
 }

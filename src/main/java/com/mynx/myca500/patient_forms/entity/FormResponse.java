@@ -39,7 +39,7 @@ public class FormResponse {
     @Column(nullable = false, columnDefinition = "jsonb")
     private Map<String, Object> answers = new HashMap<>();
 
-    @Column(nullable = false, length = 20) private String status;   // DRAFT | SUBMITTED
+    @Column(nullable = false, length = 20) private String status;
     private Instant submittedAt;
     @Column(nullable = false, updatable = false) private Instant createdAt;
     @Column(nullable = false) private Instant updatedAt;

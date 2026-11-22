@@ -14,7 +14,8 @@ public record FormFieldDto(
         @Size(max = 100) String id,
         @Size(max = 100) String name,
         @NotNull FieldType type,
-//        @Size(max = 500) String label,
+       @Size(max = 500) String label,
+        //String selectedValue;
         boolean required,
         @Valid FieldConfig config,
 //        Map<String, Object> style,
@@ -24,7 +25,7 @@ public record FormFieldDto(
     public FormFieldDto {
         id = isBlank(id) ? "fld-" + UUID.randomUUID() : id;
         name = isBlank(name) ? "grp-" + UUID.randomUUID() : name;
-//        label = label == null ? "" : label;
+       label = label == null ? "" : label;
         config = config == null ? FieldConfig.empty() : config;
 //        style = style == null ? Map.of() : Collections.unmodifiableMap(new LinkedHashMap<>(style));
 //        className = className == null ? "" : className;
@@ -33,10 +34,10 @@ public record FormFieldDto(
     private static boolean isBlank(String s) { return s == null || s.isBlank(); }
 
     public FormFieldDto withConfig(FieldConfig newConfig) {
-        return new FormFieldDto(id, name, type, required, newConfig, children);
+        return new FormFieldDto(id, name, type,label, required, newConfig, children);
     }
 
     public FormFieldDto withChildren(List<FormFieldDto> newChildren) {
-        return new FormFieldDto(id, name, type, required, config, newChildren);
+        return new FormFieldDto(id, name, type, label,required, config, newChildren);
     }
 }

@@ -3,7 +3,6 @@ package com.mynx.myca500.patient_forms.exception;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-/** A form link that cannot be used. Carries a stable error code for the frontend. */
 @Getter
 public class FormLinkException extends RuntimeException {
 
@@ -12,7 +11,8 @@ public class FormLinkException extends RuntimeException {
         LINK_INVALID(HttpStatus.NOT_FOUND, "This link is not valid"),
         LINK_EXPIRED(HttpStatus.GONE, "This link has expired"),
         LINK_REVOKED(HttpStatus.GONE, "This link has been revoked"),
-        ALREADY_SUBMITTED(HttpStatus.CONFLICT, "This form has already been submitted");
+        ALREADY_SUBMITTED(HttpStatus.CONFLICT, "This form has already been submitted"),
+        STALE_VERSION(HttpStatus.CONFLICT, "This form was changed in another window, reload and try again");
 
         private final HttpStatus status;
         private final String message;

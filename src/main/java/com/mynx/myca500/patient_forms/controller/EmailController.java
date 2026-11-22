@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v1/emails")
@@ -30,7 +29,7 @@ public class EmailController {
         return emailService.send(request);
     }
 
-    /** Kept for existing clients; same behaviour as POST /api/v1/form-templates/{id}/links with an email. */
+
     @PostMapping("/send-form-link")
     public EmailSentResponse sendFormLink(@Valid @RequestBody SendFormLinkDto request,
                                           @AuthenticationPrincipal Jwt jwt) {

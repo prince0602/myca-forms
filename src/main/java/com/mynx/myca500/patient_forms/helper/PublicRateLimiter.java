@@ -14,15 +14,18 @@ public class PublicRateLimiter {
 
     private final int maxRequestsPerMinute;
     private final int maxFailuresPerMinute;
+    private final int maxSubmitsPerMinute;
 
     private final Cache<String, AtomicInteger> requests = newWindow();
     private final Cache<String, AtomicInteger> failures = newWindow();
-
+    private final Cache<String, AtomicInteger> submits = newWindow();
     public PublicRateLimiter(
             @Value("${app.public.rate-limit-per-minute:60}") int maxRequestsPerMinute,
-            @Value("${app.public.failure-limit-per-minute:10}") int maxFailuresPerMinute) {
+            @Value("${app.public.failure-limit-per-minute:10}") int maxFailuresPerMinute,
+            @Value("${app.public.submit-limit-per-minute:10}") int maxSubmitsPerMinute) {
         this.maxRequestsPerMinute = maxRequestsPerMinute;
         this.maxFailuresPerMinute = maxFailuresPerMinute;
+        this.maxSubmitsPerMinute = maxSubmitsPerMinute;
     }
 
 
@@ -38,6 +41,10 @@ public class PublicRateLimiter {
         AtomicInteger count = failures.getIfPresent(ip);
         return count != null && count.get() >= maxFailuresPerMinute;
     }
+
+    public boolean allowSubmit(String ip) {
+                return submits.get(ip, k -> new AtomicInteger()).incrementAndGet() <= maxSubmitsPerMinute;
+            }
 
     private static Cache<String, AtomicInteger> newWindow() {
         return Caffeine.newBuilder()
