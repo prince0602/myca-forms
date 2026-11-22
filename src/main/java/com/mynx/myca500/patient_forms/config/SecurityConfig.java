@@ -1,6 +1,8 @@
 package com.mynx.myca500.patient_forms.config;
 
+import com.mynx.myca500.patient_forms.config.properties.AppSecurityProperties;
 import com.mynx.myca500.patient_forms.security.KeycloakJwtAuthenticationConverter;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -13,6 +15,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableMethodSecurity
+@EnableConfigurationProperties(AppSecurityProperties.class)
 public class SecurityConfig {
 
     @Bean

@@ -13,7 +13,9 @@ public enum ErrorCode {
     NOT_WORKSPACE_OWNER(HttpStatus.FORBIDDEN, "Only the workspace owner can do this."),
     WORKSPACE_NOT_FOUND(HttpStatus.NOT_FOUND, "Workspace not found."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found."),
-    EMAIL_NOT_VERIFIED(HttpStatus.FORBIDDEN, "Email address is not verified.");
+    EMAIL_NOT_VERIFIED(HttpStatus.FORBIDDEN, "Email address is not verified."),
+    VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "Request validation failed."),
+    MALFORMED_REQUEST(HttpStatus.BAD_REQUEST, "Request body is malformed or contains invalid values.");
 
     private final HttpStatus status;
     private final String message;
