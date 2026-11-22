@@ -17,11 +17,16 @@ final class ApiErrorResponses {
     }
 
     static ResponseEntity<List<Map<String, Object>>> of(ErrorCode errorCode, Map<String, String> fieldErrors) {
+        return of(errorCode, null, fieldErrors);
+    }
+
+    static ResponseEntity<List<Map<String, Object>>> of(ErrorCode errorCode, String detailedMessage,
+                                                       Map<String, String> fieldErrors) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("code", String.valueOf(errorCode.getStatus().value()));
         body.put("errorCode", errorCode.name());
         body.put("message", errorCode.getStatus().getReasonPhrase());
-        body.put("detailedMessage", errorCode.getMessage());
+        body.put("detailedMessage", detailedMessage != null ? detailedMessage : errorCode.getMessage());
         if (fieldErrors != null && !fieldErrors.isEmpty()) {
             body.put("fieldErrors", fieldErrors);
         }

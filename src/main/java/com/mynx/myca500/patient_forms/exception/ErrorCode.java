@@ -15,7 +15,16 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found."),
     EMAIL_NOT_VERIFIED(HttpStatus.FORBIDDEN, "Email address is not verified."),
     VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "Request validation failed."),
-    MALFORMED_REQUEST(HttpStatus.BAD_REQUEST, "Request body is malformed or contains invalid values.");
+    MALFORMED_BODY(HttpStatus.BAD_REQUEST, "Request body is malformed or contains invalid values."),
+
+
+    RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "Resource not found."),
+    DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "Resource already exists."),
+    ACCESS_DENIED(HttpStatus.FORBIDDEN, "Access denied."),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Unauthorized."),
+    RESOURCE_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Could not create the resource."),
+    IMAGE_UPLOAD_FAILED(HttpStatus.BAD_GATEWAY, "Image upload failed."),
+    EMAIL_SEND_FAILED(HttpStatus.BAD_GATEWAY, "Could not send email");
 
     private final HttpStatus status;
     private final String message;

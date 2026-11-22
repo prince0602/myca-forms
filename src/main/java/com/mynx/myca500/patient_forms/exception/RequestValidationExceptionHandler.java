@@ -1,6 +1,8 @@
 package com.mynx.myca500.patient_forms.exception;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.mynx.myca500.patient_forms.controller.EmailController;
+import com.mynx.myca500.patient_forms.controller.FormTemplateController;
 import com.mynx.myca500.patient_forms.controller.MeController;
 import com.mynx.myca500.patient_forms.controller.MemberController;
 import com.mynx.myca500.patient_forms.controller.OnboardingController;
@@ -17,8 +19,9 @@ import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice(assignableTypes = {MeController.class, OnboardingController.class,
-        WorkspaceController.class, MemberController.class})
-public class WorkspaceApiExceptionHandler {
+        WorkspaceController.class, MemberController.class,
+        FormTemplateController.class, EmailController.class})
+public class RequestValidationExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<List<Map<String, Object>>> handleValidation(MethodArgumentNotValidException ex) {
@@ -32,9 +35,9 @@ public class WorkspaceApiExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<List<Map<String, Object>>> handleUnreadable(HttpMessageNotReadableException ex) {
         if (ex.getCause() instanceof JsonMappingException mapping && !mapping.getPath().isEmpty()) {
-            return ApiErrorResponses.of(ErrorCode.MALFORMED_REQUEST, Map.of(jsonPath(mapping), "invalid value"));
+            return ApiErrorResponses.of(ErrorCode.MALFORMED_BODY, Map.of(jsonPath(mapping), "invalid value"));
         }
-        return ApiErrorResponses.of(ErrorCode.MALFORMED_REQUEST);
+        return ApiErrorResponses.of(ErrorCode.MALFORMED_BODY);
     }
 
     private static String jsonPath(JsonMappingException ex) {
