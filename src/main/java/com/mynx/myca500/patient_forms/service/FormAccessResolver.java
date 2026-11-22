@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 
-/** Token -> link -> sent form, with revoked / expired checks. Shared by open, submit and uploads. */
 @Component
 @RequiredArgsConstructor
 public class FormAccessResolver {
