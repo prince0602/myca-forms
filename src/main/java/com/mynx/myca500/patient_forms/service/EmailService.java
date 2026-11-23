@@ -31,7 +31,8 @@ public class EmailService {
 
 
     private static final Map<String, String> TEMPLATE_SUBJECTS = Map.of(
-            "form-request", "You have a form to complete");
+            "form-request", "You have a form to complete",
+            "workspace-invite", "You've been invited to join a workspace on MYCA");
 
     private final SesClient sesClient;
     private final TemplateEngine templateEngine;

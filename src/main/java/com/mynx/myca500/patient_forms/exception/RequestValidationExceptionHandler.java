@@ -3,6 +3,7 @@ package com.mynx.myca500.patient_forms.exception;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.mynx.myca500.patient_forms.controller.EmailController;
 import com.mynx.myca500.patient_forms.controller.FormTemplateController;
+import com.mynx.myca500.patient_forms.controller.InvitationController;
 import com.mynx.myca500.patient_forms.controller.MeController;
 import com.mynx.myca500.patient_forms.controller.MemberController;
 import com.mynx.myca500.patient_forms.controller.OnboardingController;
@@ -21,7 +22,8 @@ import java.util.Map;
 
 @RestControllerAdvice(assignableTypes = {MeController.class, OnboardingController.class,
         WorkspaceController.class, MemberController.class,
-        FormTemplateController.class, EmailController.class, PatientController.class})
+        FormTemplateController.class, EmailController.class, PatientController.class,
+        InvitationController.class})
 public class RequestValidationExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
