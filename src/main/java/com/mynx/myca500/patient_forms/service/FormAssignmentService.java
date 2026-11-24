@@ -5,7 +5,7 @@ import com.mynx.myca500.patient_forms.dto.EmailSentResponse;
 import com.mynx.myca500.patient_forms.dto.FormLinkResponse;
 import com.mynx.myca500.patient_forms.entity.FormTemplate;
 import com.mynx.myca500.patient_forms.entity.FormTemplateVersion;
-import com.mynx.myca500.patient_forms.entity.Patient;
+import com.mynx.myca500.patient_forms.entity.Recipient;
 import com.mynx.myca500.patient_forms.entity.SentForm;
 import com.mynx.myca500.patient_forms.enums.SentFormStatus;
 import com.mynx.myca500.patient_forms.enums.TemplateStatus;
@@ -13,7 +13,7 @@ import com.mynx.myca500.patient_forms.exception.ResourceNotFoundException;
 import com.mynx.myca500.patient_forms.exception.ValidationException;
 import com.mynx.myca500.patient_forms.repository.FormTemplateRepository;
 import com.mynx.myca500.patient_forms.repository.FormTemplateVersionRepository;
-import com.mynx.myca500.patient_forms.repository.PatientRepository;
+import com.mynx.myca500.patient_forms.repository.RecipientRepository;
 import com.mynx.myca500.patient_forms.repository.SentFormRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Assigns a form template to a patient: creates the {@link SentForm} pinned to the template's
+ * Assigns a form template to a recipient: creates the {@link SentForm} pinned to the template's
  * current version, issues a {@code FormLink} token, and optionally emails the link.
  */
 @Service
@@ -40,7 +40,7 @@ public class FormAssignmentService {
     private final SentFormRepository sentForms;
     private final FormLinkService formLinkService;
     private final EmailService emailService;
-    private final PatientRepository patients;
+    private final RecipientRepository recipients;
 
     @Value("${app.environment-url}")
     private String environmentUrl;
@@ -60,7 +60,7 @@ public class FormAssignmentService {
      * @param expiresInHours optional override; falls back to the version's expirationHours, then the default
      */
     @Transactional
-    public FormLinkResponse createLink(UUID templateId, String patientId, String email,
+    public FormLinkResponse createLink(UUID templateId, String recipientId, String email,
                                        Integer expiresInHours, String createdBy) {
         FormTemplate template = templates.findById(templateId)
                 .orElseThrow(() -> new ResourceNotFoundException("Template not found: " + templateId));
@@ -81,7 +81,7 @@ public class FormAssignmentService {
         SentForm sf = new SentForm();
         sf.setTemplateId(templateId);
         sf.setTemplateVersion(pinnedVersion);
-        sf.setPatientId(patientId);
+        sf.setRecipientId(recipientId);
         sf.setRecipientEmail(sendEmail ? email : null);
         sf.setStatus(SentFormStatus.SENT);
         sf.setSentAt(now);
@@ -104,14 +104,15 @@ public class FormAssignmentService {
     }
 
 
-    public String resolveRecipientEmail(String patientId, String email) {
+    /** Legacy send-form-link: an explicit email wins, otherwise the stored recipient's email is used. */
+    public String resolveRecipientEmail(String recipientId, String email) {
         if (email != null && !email.isBlank()) {
             return email;
         }
-        return PatientService.parseId(patientId)
-                .flatMap(patients::findById)
-                .map(Patient::getEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("Patient not found: " + patientId));
+        return RecipientService.parseId(recipientId)
+                .flatMap(recipients::findById)
+                .map(Recipient::getEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Recipient not found: " + recipientId));
     }
 
 

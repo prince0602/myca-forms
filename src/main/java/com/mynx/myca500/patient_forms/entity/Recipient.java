@@ -17,12 +17,17 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * A person a form is sent to, scoped to a workspace. Created from the "send form" prompt.
+ * Identity within a workspace is email + first name + last name (names case-insensitive),
+ * so one email can belong to several recipients with different names (ux_recipients_identity).
+ */
 @Entity
-@Table(name = "patients")
+@Table(name = "recipients")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Patient {
+public class Recipient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -31,19 +36,23 @@ public class Patient {
     @Column(name = "workspace_id", nullable = false, updatable = false)
     private UUID workspaceId;
 
-    @Column(name = "full_name", nullable = false, length = 200)
-    private String fullName;
+    @Column(name = "first_name", nullable = false, length = 100)
+    private String firstName;
 
-    @Column(name = "address", nullable = false, length = 500)
-    private String address;
+    @Column(name = "last_name", nullable = false, length = 100)
+    private String lastName;
 
+    /** Lower-cased by EmailUtil.normalize. */
     @Column(name = "email", nullable = false, length = 320)
     private String email;
 
-    @Column(name = "phone_number", nullable = false, length = 25)
+    @Column(name = "phone_number", length = 25)
     private String phoneNumber;
 
-    @Column(name = "dob", nullable = false)
+    @Column(name = "address", length = 500)
+    private String address;
+
+    @Column(name = "dob")
     private LocalDate dob;
 
     @Column(name = "created_by", nullable = false, updatable = false)
@@ -60,4 +69,8 @@ public class Patient {
     @Version
     @Column(name = "version")
     private Long version;
+
+    public String fullName() {
+        return (firstName + " " + lastName).trim();
+    }
 }

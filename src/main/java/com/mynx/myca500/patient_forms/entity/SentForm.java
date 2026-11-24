@@ -31,7 +31,7 @@ public class SentForm {
 
     @Column(nullable = false) private Instant sentAt;
 
-    @Column(nullable = false, length = 64) private String patientId;
+    @Column(nullable = false, length = 64) private String recipientId;
     @Column(length = 320) private String recipientEmail;
     private Instant expiresAt;
     private Instant openedAt;

@@ -6,12 +6,14 @@ import com.mynx.myca500.patient_forms.dto.SentFormListItem;
 import com.mynx.myca500.patient_forms.dto.SentFormPreview;
 import com.mynx.myca500.patient_forms.entity.FormResponse;
 import com.mynx.myca500.patient_forms.entity.FormTemplateVersion;
+import com.mynx.myca500.patient_forms.entity.Recipient;
 import com.mynx.myca500.patient_forms.entity.SentForm;
 import com.mynx.myca500.patient_forms.enums.SentFormStatus;
 import com.mynx.myca500.patient_forms.exception.ResourceNotFoundException;
 import com.mynx.myca500.patient_forms.repository.FormResponseRepository;
 import com.mynx.myca500.patient_forms.repository.FormTemplateRepository;
 import com.mynx.myca500.patient_forms.repository.FormTemplateVersionRepository;
+import com.mynx.myca500.patient_forms.repository.RecipientRepository;
 import com.mynx.myca500.patient_forms.repository.SentFormRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,10 +23,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -37,17 +41,18 @@ public class SentFormQueryService {
     private final SentFormRepository sentForms;
     private final FormResponseRepository responses;
     private final ImageUrlResolver imageUrls;
+    private final RecipientRepository recipients;
 
 
-    public Paginated<SentFormListItem> list(UUID templateId, String patientId, int page, int size) {
+    public Paginated<SentFormListItem> list(UUID templateId, String recipientId, int page, int size) {
         PageRequest pageable = PageRequest.of(
                 Math.max(page - 1, 0),
                 Math.min(Math.max(size, 1), 100),
                 Sort.by(Sort.Direction.DESC, "sentAt"));
 
-        Page<SentForm> result = patientId == null || patientId.isBlank()
+        Page<SentForm> result = recipientId == null || recipientId.isBlank()
                 ? sentForms.findByTemplateId(templateId, pageable)
-                : sentForms.findByTemplateIdAndPatientId(templateId, patientId.trim(), pageable);
+                : sentForms.findByTemplateIdAndRecipientId(templateId, recipientId.trim(), pageable);
 
 
         if (result.isEmpty() && !templates.existsById(templateId)) {
@@ -55,7 +60,9 @@ public class SentFormQueryService {
         }
 
         Instant now = Instant.now();
-        List<SentFormListItem> items = result.getContent().stream().map(s -> toItem(s, now)).toList();
+        Map<String, String> names = recipientNames(result.getContent().stream().map(SentForm::getRecipientId).toList());
+        List<SentFormListItem> items = result.getContent().stream()
+                .map(s -> toItem(s, names.get(s.getRecipientId()), now)).toList();
         return new Paginated<>(items, result.getTotalElements());
     }
 
@@ -76,7 +83,7 @@ public class SentFormQueryService {
 
         List<FormFieldDto> fields = imageUrls.resolve(version.getFields() == null ? List.of() : version.getFields());
         return new SentFormPreview(
-                toItem(form, Instant.now()),
+                toItem(form, recipientNames(List.of(form.getRecipientId())).get(form.getRecipientId()), Instant.now()),
                 version.getLabel(),
                 version.getDescription(),
                 fields,
@@ -84,10 +91,25 @@ public class SentFormQueryService {
                 saved.map(FormResponse::getStatus).orElse(null));
     }
 
-    private static SentFormListItem toItem(SentForm s, Instant now) {
+    /**
+     * Recipient display names in one query. Sent forms from the legacy endpoints may hold ids that are not
+     * recipient UUIDs; those simply get no name.
+     */
+    private Map<String, String> recipientNames(Collection<String> recipientIds) {
+        List<UUID> ids = recipientIds.stream().distinct()
+                .map(RecipientService::parseId).flatMap(Optional::stream).toList();
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+        return recipients.findAllById(ids).stream()
+                .collect(Collectors.toMap(r -> r.getId().toString(), Recipient::fullName));
+    }
+
+    private static SentFormListItem toItem(SentForm s, String recipientName, Instant now) {
         return new SentFormListItem(
                 s.getId().toString(),
-                s.getPatientId(),
+                s.getRecipientId(),
+                recipientName,
                 s.getRecipientEmail(),
                 s.getTemplateVersion(),
                 effectiveStatus(s, now).getValue(),

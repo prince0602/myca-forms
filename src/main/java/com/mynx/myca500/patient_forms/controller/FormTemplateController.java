@@ -149,10 +149,10 @@ public class FormTemplateController {
 
     @GetMapping("/{id}/sent-forms")
     public Paginated<SentFormListItem> sentForms(@PathVariable UUID id,
-                                                 @RequestParam(required = false) String patientId,
+                                                 @RequestParam(required = false) String recipientId,
                                                  @RequestParam(defaultValue = "1") int page,
                                                  @RequestParam(defaultValue = "20") int size) {
-        return sentFormQueryService.list(id, patientId, page, size);
+        return sentFormQueryService.list(id, recipientId, page, size);
     }
 
 

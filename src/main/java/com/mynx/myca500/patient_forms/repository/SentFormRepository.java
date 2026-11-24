@@ -61,7 +61,7 @@ public interface SentFormRepository extends JpaRepository<SentForm, UUID> {
 
     Page<SentForm> findByTemplateId(UUID templateId, Pageable pageable);
 
-    Page<SentForm> findByTemplateIdAndPatientId(UUID templateId, String patientId, Pageable pageable);
+    Page<SentForm> findByTemplateIdAndRecipientId(UUID templateId, String recipientId, Pageable pageable);
 
     @Query("select s.templateId as templateId, count(s) as total from SentForm s "
             + "where s.templateId in :ids group by s.templateId")
