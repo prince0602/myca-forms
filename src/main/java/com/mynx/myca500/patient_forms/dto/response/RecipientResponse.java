@@ -5,7 +5,6 @@ import com.mynx.myca500.patient_forms.entity.Recipient;
 import java.time.Instant;
 import java.time.LocalDate;
 
-/** workspaceId is the public 6-character workspace ID. Optional fields are null when not provided. */
 public record RecipientResponse(
         String id,
         String workspaceId,

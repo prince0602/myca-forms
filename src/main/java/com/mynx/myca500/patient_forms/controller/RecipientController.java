@@ -25,7 +25,6 @@ public class RecipientController {
     private final CurrentUserService currentUserService;
     private final RecipientService recipientService;
 
-    /** "Send form" prompt: saves or reuses the recipient, then emails them the form link. */
     @PostMapping("/send-form")
     public SendFormResponse sendForm(@AuthenticationPrincipal Jwt jwt, @PathVariable String workspaceId,
                                      @Valid @RequestBody SendFormToRecipientRequest request) {

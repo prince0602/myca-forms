@@ -8,10 +8,7 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
-/**
- * Recipient entered in the "send form" prompt. firstName, lastName and email are required;
- * the rest are optional (blank strings are treated as not provided). dob is ISO yyyy-MM-dd.
- */
+
 public record RecipientDetails(
         @NotBlank @Size(max = 100) String firstName,
         @NotBlank @Size(max = 100) String lastName,

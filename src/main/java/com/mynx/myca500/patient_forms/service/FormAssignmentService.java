@@ -104,7 +104,6 @@ public class FormAssignmentService {
     }
 
 
-    /** Legacy send-form-link: an explicit email wins, otherwise the stored recipient's email is used. */
     public String resolveRecipientEmail(String recipientId, String email) {
         if (email != null && !email.isBlank()) {
             return email;

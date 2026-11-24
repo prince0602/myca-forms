@@ -29,11 +29,7 @@ public class RecipientService {
     private final WorkspaceAccessService workspaceAccessService;
     private final FormAssignmentService formAssignmentService;
 
-    /**
-     * Saves (or reuses) the recipient, then creates the form link pinned to the template's current
-     * version and emails it to the recipient. The recipient is kept even if the email fails, so a
-     * retry reuses it; the sent form itself is rolled back by createLink on email failure.
-     */
+
     public SendFormResponse sendForm(User user, String publicWorkspaceId, SendFormToRecipientRequest request,
                                      String sentBy) {
         WorkspaceAccess access = workspaceAccessService.requireMember(user.getId(), publicWorkspaceId);
@@ -53,10 +49,6 @@ public class RecipientService {
         return RecipientResponse.from(recipient, publicWorkspaceId);
     }
 
-    /**
-     * Same workspace + email + first/last name (case-insensitive) = same recipient: it is reused and any
-     * optional field provided now (phone, address, dob) replaces the stored value. Otherwise a new one is created.
-     */
     Recipient upsert(UUID workspaceId, UUID userId, RecipientDetails details) {
         String email = EmailUtil.normalize(details.email());
         String firstName = details.firstName().trim();
@@ -78,12 +70,10 @@ public class RecipientService {
         try {
             return recipientRepository.saveAndFlush(r);
         } catch (DataIntegrityViolationException e) {
-            // The same recipient was created concurrently (ux_recipients_identity): reuse it.
             return recipientRepository.findIdentity(workspaceId, email, firstName, lastName).orElseThrow(() -> e);
         }
     }
 
-    /** Copies the optional fields that were provided. Returns true if anything changed. */
     private static boolean applyOptionalFields(Recipient r, RecipientDetails d) {
         boolean changed = false;
         if (d.phoneNumber() != null && !d.phoneNumber().equals(r.getPhoneNumber())) {

@@ -14,10 +14,6 @@ public interface RecipientRepository extends JpaRepository<Recipient, UUID> {
 
     Optional<Recipient> findByIdAndWorkspaceId(UUID id, UUID workspaceId);
 
-    /**
-     * Same person in a workspace: email (stored lower-cased) + names compared case-insensitively.
-     * Uses lower() to match the ux_recipients_identity index.
-     */
     @Query("select r from Recipient r where r.workspaceId = :workspaceId and r.email = :email "
             + "and lower(r.firstName) = lower(:firstName) and lower(r.lastName) = lower(:lastName)")
     Optional<Recipient> findIdentity(@Param("workspaceId") UUID workspaceId,
