@@ -13,7 +13,7 @@ public enum ErrorCode {
     NOT_WORKSPACE_OWNER(HttpStatus.FORBIDDEN, "Only the workspace owner can do this."),
     WORKSPACE_NOT_FOUND(HttpStatus.NOT_FOUND, "Workspace not found."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found."),
-    PATIENT_NOT_FOUND(HttpStatus.NOT_FOUND, "Patient not found."),
+    RECIPIENT_NOT_FOUND(HttpStatus.NOT_FOUND, "Recipient not found."),
     EMAIL_NOT_VERIFIED(HttpStatus.FORBIDDEN, "Email address is not verified."),
     PLAN_INVITES_NOT_ALLOWED(HttpStatus.FORBIDDEN, "Your plan does not allow inviting members."),
     CANNOT_INVITE_SELF(HttpStatus.UNPROCESSABLE_ENTITY, "You cannot invite yourself."),

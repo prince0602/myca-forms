@@ -5,7 +5,8 @@ import java.time.Instant;
 
 public record SentFormListItem(
         String sentFormId,
-        String patientId,
+        String recipientId,
+        String recipientName,
         String recipientEmail,
         int templateVersion,
         String status,

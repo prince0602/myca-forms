@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - property:
+      name: baa.content-url
+      value: http://localhost:9191/legal/baa-2026.1.pdf
+
+  - property:
+      name: baa.s3-url
+      value: https://myca-public-assests.s3.us-east-1.amazonaws.com/legal/baa-2026.1.pdf
+
+  - include:
+      file: changes/001-workspace-schema.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/002-form-schema.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/003-baa-s3.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/004-recipients.sql
+      relativeToChangelogFile: true
