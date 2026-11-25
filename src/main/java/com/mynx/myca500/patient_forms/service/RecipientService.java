@@ -1,6 +1,7 @@
 package com.mynx.myca500.patient_forms.service;
 
 import com.mynx.myca500.patient_forms.dto.FormLinkResponse;
+import com.mynx.myca500.patient_forms.dto.Paginated;
 import com.mynx.myca500.patient_forms.dto.request.RecipientDetails;
 import com.mynx.myca500.patient_forms.dto.request.SendFormToRecipientRequest;
 import com.mynx.myca500.patient_forms.dto.response.RecipientResponse;
@@ -14,9 +15,13 @@ import com.mynx.myca500.patient_forms.repository.RecipientRepository;
 import com.mynx.myca500.patient_forms.util.EmailUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,6 +52,27 @@ public class RecipientService {
                 .flatMap(id -> recipientRepository.findByIdAndWorkspaceId(id, access.workspace().getId()))
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECIPIENT_NOT_FOUND));
         return RecipientResponse.from(recipient, publicWorkspaceId);
+    }
+
+    @Transactional(readOnly = true)
+    public Paginated<RecipientResponse> list(User user, String publicWorkspaceId, String firstName, String lastName,
+                                             String email, int page, int size) {
+        WorkspaceAccess access = workspaceAccessService.requireMember(user.getId(), publicWorkspaceId);
+        PageRequest pageable = PageRequest.of(
+                Math.max(page - 1, 0),
+                Math.min(Math.max(size, 1), 100),
+                Sort.by(Sort.Direction.DESC, "createdAt", "id"));
+
+        Page<Recipient> result = recipientRepository
+                .findByWorkspaceIdAndFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCaseAndEmailContainingIgnoreCase(
+                        access.workspace().getId(), filter(firstName), filter(lastName), filter(email), pageable);
+        List<RecipientResponse> items = result.getContent().stream()
+                .map(r -> RecipientResponse.from(r, publicWorkspaceId)).toList();
+        return new Paginated<>(items, result.getTotalElements());
+    }
+
+    private static String filter(String value) {
+        return value == null ? "" : value.trim();
     }
 
     Recipient upsert(UUID workspaceId, UUID userId, RecipientDetails details) {
