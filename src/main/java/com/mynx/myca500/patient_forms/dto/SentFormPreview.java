@@ -10,5 +10,6 @@ public record SentFormPreview(
         String description,
         List<FormFieldDto> fields,
         Map<String, Object> answers,
-        String responseStatus) {
+        String responseStatus,
+        Map<String, String> fileUrls) {
 }

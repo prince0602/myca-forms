@@ -14,5 +14,6 @@ public record PublicFormResponse(
         Instant submittedAt,
         List<FormFieldDto> fields,
         Map<String, Object> answers,
-        Long lockVersion
+        Long lockVersion,
+        Map<String, String> fileUrls
 ) {}

@@ -1,5 +1,6 @@
 package com.mynx.myca500.patient_forms.controller;
 
+import com.mynx.myca500.patient_forms.dto.BatchUploadRequest;
 import com.mynx.myca500.patient_forms.dto.SaveDraftRequest;
 import com.mynx.myca500.patient_forms.dto.SubmitFormRequest;
 import com.mynx.myca500.patient_forms.exception.FormLinkException;
@@ -74,6 +75,16 @@ public class PublicFormController {
         String ip = request.getRemoteAddr();
         if (!limiter.allowSubmit(ip) || limiter.tooManyFailures(ip)) return rateLimited();
         return guarded(ip, () -> service.createUpload(token, extension));
+    }
+
+    @PostMapping(path = "/uploads/batch", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> uploadBatch(
+            @RequestHeader(value = TOKEN_HEADER, required = false) String token,
+            @Valid @RequestBody BatchUploadRequest body,
+            HttpServletRequest request) {
+        String ip = request.getRemoteAddr();
+        if (!limiter.allowSubmit(ip) || limiter.tooManyFailures(ip)) return rateLimited();
+        return guarded(ip, () -> service.createUploads(token, body.extensions()));
     }
 
     private ResponseEntity<?> guarded(String ip, Supplier<?> call) {

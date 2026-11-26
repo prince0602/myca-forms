@@ -42,6 +42,7 @@ public class SentFormQueryService {
     private final FormResponseRepository responses;
     private final ImageUrlResolver imageUrls;
     private final RecipientRepository recipients;
+    private final FormUploadUrlResolver uploadUrls;
 
 
     public Paginated<SentFormListItem> list(UUID templateId, String recipientId, int page, int size) {
@@ -82,13 +83,15 @@ public class SentFormQueryService {
                 : Optional.empty();
 
         List<FormFieldDto> fields = imageUrls.resolve(version.getFields() == null ? List.of() : version.getFields());
+        Map<String, Object> answers = saved.map(FormResponse::getAnswers).orElseGet(Map::of);
         return new SentFormPreview(
                 toItem(form, recipientNames(List.of(form.getRecipientId())).get(form.getRecipientId()), Instant.now()),
                 version.getLabel(),
                 version.getDescription(),
                 fields,
-                saved.map(FormResponse::getAnswers).orElseGet(Map::of),
-                saved.map(FormResponse::getStatus).orElse(null));
+                answers,
+                saved.map(FormResponse::getStatus).orElse(null),
+                uploadUrls.resolve(form.getId(), answers));
     }
 
     /**

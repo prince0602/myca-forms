@@ -1,5 +1,6 @@
 package com.mynx.myca500.patient_forms.service;
 
+import com.mynx.myca500.patient_forms.dto.BatchUploadResponse;
 import com.mynx.myca500.patient_forms.dto.FormFieldDto;
 import com.mynx.myca500.patient_forms.dto.PublicFormResponse;
 import com.mynx.myca500.patient_forms.dto.PublicUploadResponse;
@@ -44,7 +45,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PublicFormService {
 
-    private static final String UPLOAD_ROOT = "public-uploads/";
     private static final Set<String> UPLOAD_EXTENSIONS = Set.of("png", "jpg", "jpeg", "pdf");
 
     private final FormAccessResolver resolver;
@@ -58,6 +58,7 @@ public class PublicFormService {
     private final TransactionTemplate tx;
     private final ApplicationEventPublisher events;
     private final ImageUrlResolver imageUrls;
+    private final FormUploadUrlResolver uploadUrls;
 
 
     @Transactional
@@ -81,6 +82,7 @@ public class PublicFormService {
                 ? responses.findBySentFormId(form.getId())
                 : Optional.empty();
 
+        Map<String, Object> answers = saved.map(FormResponse::getAnswers).orElseGet(Map::of);
         return new PublicFormResponse(
                 version.getLabel(),
                 version.getDescription(),
@@ -90,8 +92,9 @@ public class PublicFormService {
                 link.getExpiresAt() != null ? link.getExpiresAt() : form.getExpiresAt(),
                 form.getSubmittedAt(),
                 imageUrls.resolve(fieldsOf(version)),
-                saved.map(FormResponse::getAnswers).orElseGet(Map::of),
-                saved.map(FormResponse::getLockVersion).orElse(null));
+                answers,
+                saved.map(FormResponse::getLockVersion).orElse(null),
+                uploadUrls.resolve(form.getId(), answers));
     }
 
 
@@ -190,20 +193,39 @@ public class PublicFormService {
 
 
     public PublicUploadResponse createUpload(String token, String extension) {
-        String ext = extension == null ? "" : extension.toLowerCase(Locale.ROOT);
+        String ext = uploadExtension(extension);
+        SentForm form = resolver.forWrite(token).sentForm();
+        return newUpload(form.getId(), ext);
+    }
+
+    /**
+     * Issues several upload slots with one token check, so a form with many signatures needs one call
+     * (and one rate-limit hit) instead of one per file. All extensions are validated before any URL is signed.
+     */
+    public BatchUploadResponse createUploads(String token, List<String> extensions) {
+        List<String> exts = extensions.stream().map(PublicFormService::uploadExtension).toList();
+        SentForm form = resolver.forWrite(token).sentForm();
+        return new BatchUploadResponse(exts.stream().map(ext -> newUpload(form.getId(), ext)).toList());
+    }
+
+    private PublicUploadResponse newUpload(UUID sentFormId, String ext) {
+        String prefix = uploadPrefix(sentFormId);
+        String folder = prefix.substring(0, prefix.length() - 1);
+        String fileName = UUID.randomUUID() + "." + ext;
+        String url = presigner.createPreSignedPutUrl(folder, fileName);
+        return new PublicUploadResponse(prefix + fileName, url);
+    }
+
+    private static String uploadExtension(String extension) {
+        String ext = extension == null ? "" : extension.strip().toLowerCase(Locale.ROOT);
         if (!UPLOAD_EXTENSIONS.contains(ext)) {
             throw new ValidationException("Unsupported file type");
         }
-        SentForm form = resolver.forWrite(token).sentForm();
-
-        String folder = UPLOAD_ROOT + form.getId();
-        String fileName = UUID.randomUUID() + "." + ext;
-        String url = presigner.createPreSignedPutUrl(folder, fileName);
-        return new PublicUploadResponse(folder + "/" + fileName, url);
+        return ext;
     }
 
     static String uploadPrefix(UUID sentFormId) {
-        return UPLOAD_ROOT + sentFormId + "/";
+        return FormUploadUrlResolver.uploadPrefix(sentFormId);
     }
 
 
