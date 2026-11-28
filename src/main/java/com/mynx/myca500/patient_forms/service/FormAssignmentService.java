@@ -25,10 +25,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Assigns a form template to a recipient: creates the {@link SentForm} pinned to the template's
- * current version, issues a {@code FormLink} token, and optionally emails the link.
- */
 @Service
 @RequiredArgsConstructor
 public class FormAssignmentService {
@@ -41,34 +37,39 @@ public class FormAssignmentService {
     private final FormLinkService formLinkService;
     private final EmailService emailService;
     private final RecipientRepository recipients;
+    private final FormUsageService formUsageService;
 
     @Value("${app.environment-url}")
     private String environmentUrl;
 
-    /** Used when neither the request nor the template version sets an expiry. */
+
     @Value("${forms.link.default-expiration-hours:72}")
     private int defaultExpirationHours;
 
-    /** Same upper bound the template validator applies to expirationHours. */
     @Value("${forms.template.max-expiration-hours:8760}")
     private int maxExpirationHours;
 
-    /**
-     * Creates a shareable link for {@code templateId}. If {@code email} is non-blank the link is
-     * also emailed; an email failure rolls the whole assignment back.
-     *
-     * @param expiresInHours optional override; falls back to the version's expirationHours, then the default
-     */
     @Transactional
     public FormLinkResponse createLink(UUID templateId, String recipientId, String email,
                                        Integer expiresInHours, String createdBy) {
+        return doCreateLink(templateId, recipientId, email, expiresInHours, createdBy);
+    }
+
+    @Transactional
+    public FormLinkResponse createLinkForWorkspace(UUID workspaceId, UUID templateId, String recipientId,
+                                                   String email, Integer expiresInHours, String createdBy) {
+        formUsageService.consumeOne(workspaceId);
+        return doCreateLink(templateId, recipientId, email, expiresInHours, createdBy);
+    }
+
+    private FormLinkResponse doCreateLink(UUID templateId, String recipientId, String email,
+                                          Integer expiresInHours, String createdBy) {
         FormTemplate template = templates.findById(templateId)
                 .orElseThrow(() -> new ResourceNotFoundException("Template not found: " + templateId));
         if (template.getStatus() != TemplateStatus.ACTIVE) {
             throw new ValidationException("Template is not active: " + templateId);
         }
 
-        // Pin the link to the template's current version on the server.
         int pinnedVersion = template.getCurrentVersion();
         FormTemplateVersion version = versions.findByTemplateIdAndVersionNumber(templateId, pinnedVersion)
                 .orElseThrow(() -> new ResourceNotFoundException(

@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface WorkspaceRepository extends JpaRepository<Workspace, UUID> {
+public interface WorkspaceRepository extends JpaRepository<Workspace, UUID>, WorkspaceRepositoryCustom {
 
     Optional<Workspace> findByWorkspaceId(String workspaceId);
 

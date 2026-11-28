@@ -12,6 +12,7 @@ import com.mynx.myca500.patient_forms.model.ClientInfo;
 import com.mynx.myca500.patient_forms.model.WorkspaceAccess;
 import com.mynx.myca500.patient_forms.repository.MembershipRepository;
 import com.mynx.myca500.patient_forms.repository.WorkspaceRepository;
+import com.mynx.myca500.patient_forms.util.BillingCycleUtil;
 import com.mynx.myca500.patient_forms.util.PublicIdUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,8 @@ public class WorkspaceService {
         workspace.setAccountType(accountType);
         workspace.setPlan(Plan.FREE);
         workspace.setFormsUsed(0);
+        workspace.setBillingAnchorAt(now);
+        workspace.setUsageRefreshAt(BillingCycleUtil.nextRefreshAfter(now, now));
         workspace.setBaaVersion(baa.getVersion());
         workspace.setBaaAcceptedBy(owner.getId());
         workspace.setBaaAcceptedAt(now);

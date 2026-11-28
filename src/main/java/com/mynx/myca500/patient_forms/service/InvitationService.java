@@ -106,6 +106,7 @@ public class InvitationService {
                     old.setStatus(InvitationStatus.REVOKED);
                     invitationRepository.saveAndFlush(old);
                 });
+        requireFreeSeat(workspace, now, true);
 
         String token = TokenUtil.generate();
         Invitation invitation = new Invitation();
@@ -207,10 +208,16 @@ public class InvitationService {
             throw new BusinessException(ErrorCode.ONBOARDING_REQUIRED);
         }
 
-        Workspace workspace = workspaceRepository.findById(invitation.getWorkspaceId())
+        Workspace workspace = workspaceRepository.lockById(invitation.getWorkspaceId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVITATION_NOT_FOUND));
         if (!workspace.getPlan().allowsInvites()) {
             throw new BusinessException(ErrorCode.PLAN_INVITES_NOT_ALLOWED);
+        }
+        boolean alreadyHasAccess = membershipRepository.findByUserIdAndWorkspaceId(caller.getId(), workspace.getId())
+                .filter(workspaceAccessService::hasAccess)
+                .isPresent();
+        if (!alreadyHasAccess) {
+            requireFreeSeat(workspace, now, false);
         }
 
         Membership membership = upsertMembership(caller.getId(), invitation, now);
@@ -230,6 +237,17 @@ public class InvitationService {
                 membership.getRole(), membership.getJoinedAt());
     }
 
+
+    private void requireFreeSeat(Workspace workspace, Instant now, boolean countPendingInvites) {
+        long taken = membershipRepository.countAccessibleByWorkspaceId(workspace.getId(), MembershipStatus.ACTIVE, now);
+        if (countPendingInvites) {
+            taken += invitationRepository.countByWorkspaceIdAndStatusAndExpiresAtAfter(
+                    workspace.getId(), InvitationStatus.PENDING, now);
+        }
+        if (taken >= workspace.getPlan().maxUsers()) {
+            throw new BusinessException(ErrorCode.PLAN_SEAT_LIMIT_REACHED);
+        }
+    }
 
     private Membership upsertMembership(UUID userId, Invitation invitation, Instant now) {
         Membership membership = membershipRepository.findByUserIdAndWorkspaceId(userId, invitation.getWorkspaceId())

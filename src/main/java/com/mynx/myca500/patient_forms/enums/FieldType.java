@@ -16,6 +16,5 @@ public enum FieldType {
 
     public boolean isChoice() { return this == DROPDOWN || this == CHECKBOX || this == RADIO; }
 
-    /** AC4-S6: Dropdown/Radio need 2+ options, Checkbox needs 1+. */
     public int minOptions() { return this == CHECKBOX ? 1 : 2; }
 }

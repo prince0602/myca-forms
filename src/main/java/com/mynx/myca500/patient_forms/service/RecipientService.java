@@ -39,8 +39,9 @@ public class RecipientService {
                                      String sentBy) {
         WorkspaceAccess access = workspaceAccessService.requireMember(user.getId(), publicWorkspaceId);
         Recipient recipient = upsert(access.workspace().getId(), user.getId(), request.recipient());
-        FormLinkResponse link = formAssignmentService.createLink(request.templateId(), recipient.getId().toString(),
-                recipient.getEmail(), request.expiresInHours(), sentBy);
+        FormLinkResponse link = formAssignmentService.createLinkForWorkspace(access.workspace().getId(),
+                request.templateId(), recipient.getId().toString(), recipient.getEmail(),
+                request.expiresInHours(), sentBy);
         return new SendFormResponse(link.sentFormId(), recipient.getId().toString(), link.templateVersion(),
                 link.expiresAt(), link.emailMessageId());
     }

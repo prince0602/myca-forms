@@ -1,6 +1,7 @@
 package com.mynx.myca500.patient_forms.entity;
 
 import com.mynx.myca500.patient_forms.enums.AccountType;
+import com.mynx.myca500.patient_forms.enums.BillingInterval;
 import com.mynx.myca500.patient_forms.enums.Plan;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -53,6 +54,13 @@ public class Workspace {
 
     @Column(name = "usage_refresh_at")
     private Instant usageRefreshAt;
+
+    @Column(name = "billing_anchor_at", nullable = false)
+    private Instant billingAnchorAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "billing_interval", length = 10)
+    private BillingInterval billingInterval;
 
     @Column(name = "baa_version", length = 20)
     private String baaVersion;

@@ -30,6 +30,16 @@ public interface MembershipRepository extends JpaRepository<Membership, UUID> {
                                             @Param("status") MembershipStatus status,
                                             @Param("now") Instant now);
 
+    @Query("""
+           select count(m) from Membership m
+            where m.workspaceId = :workspaceId
+              and m.status = :status
+              and (m.accessEndsAt is null or m.accessEndsAt > :now)
+           """)
+    long countAccessibleByWorkspaceId(@Param("workspaceId") UUID workspaceId,
+                                      @Param("status") MembershipStatus status,
+                                      @Param("now") Instant now);
+
     @Modifying
     @Query("""
            update Membership m

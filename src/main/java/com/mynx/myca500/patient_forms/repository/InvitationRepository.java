@@ -22,4 +22,6 @@ public interface InvitationRepository extends JpaRepository<Invitation, UUID> {
     List<Invitation> findByWorkspaceIdAndStatusOrderByCreatedAtDesc(UUID workspaceId, InvitationStatus status);
 
     long countByWorkspaceIdAndEmailAndCreatedAtAfter(UUID workspaceId, String email, Instant since);
+
+    long countByWorkspaceIdAndStatusAndExpiresAtAfter(UUID workspaceId, InvitationStatus status, Instant now);
 }

@@ -37,7 +37,15 @@ public enum ErrorCode {
     RESOURCE_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Could not create the resource."),
     IMAGE_UPLOAD_FAILED(HttpStatus.BAD_GATEWAY, "Image upload failed."),
     PAYLOAD_TOO_LARGE(HttpStatus.PAYLOAD_TOO_LARGE, "Upload exceeds the maximum allowed size (5 MB per image)."),
-    EMAIL_SEND_FAILED(HttpStatus.BAD_GATEWAY, "Could not send email");
+    EMAIL_SEND_FAILED(HttpStatus.BAD_GATEWAY, "Could not send email"),
+
+    FORM_LIMIT_REACHED(HttpStatus.FORBIDDEN, "This workspace has used all of its forms for this month. Upgrade to send more."),
+    PLAN_SEAT_LIMIT_REACHED(HttpStatus.FORBIDDEN, "This workspace has reached the maximum number of users for its plan."),
+    PLAN_NOT_PURCHASABLE(HttpStatus.UNPROCESSABLE_ENTITY, "This plan cannot be purchased in the app."),
+    ALREADY_ON_PLAN(HttpStatus.CONFLICT, "This workspace is already on this plan."),
+    PAYMENT_NOT_CONFIGURED(HttpStatus.SERVICE_UNAVAILABLE, "Card payments are not available right now."),
+    PAYMENT_VERIFICATION_FAILED(HttpStatus.PAYMENT_REQUIRED, "The card payment could not be verified."),
+    PAYMENT_ALREADY_USED(HttpStatus.CONFLICT, "This payment has already been used.");
 
     private final HttpStatus status;
     private final String message;
