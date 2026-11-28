@@ -43,6 +43,7 @@ public class SentFormQueryService {
     private final ImageUrlResolver imageUrls;
     private final RecipientRepository recipients;
     private final FormUploadUrlResolver uploadUrls;
+    private final FormResponsePdfService pdfs;
 
 
     public Paginated<SentFormListItem> list(UUID templateId, String recipientId, int page, int size) {
@@ -84,6 +85,7 @@ public class SentFormQueryService {
 
         List<FormFieldDto> fields = imageUrls.resolve(version.getFields() == null ? List.of() : version.getFields());
         Map<String, Object> answers = saved.map(FormResponse::getAnswers).orElseGet(Map::of);
+        FormResponsePdfService.PdfAccess pdf = saved.map(pdfs::access).orElse(FormResponsePdfService.PdfAccess.NONE);
         return new SentFormPreview(
                 toItem(form, recipientNames(List.of(form.getRecipientId())).get(form.getRecipientId()), Instant.now()),
                 version.getLabel(),
@@ -91,13 +93,12 @@ public class SentFormQueryService {
                 fields,
                 answers,
                 saved.map(FormResponse::getStatus).orElse(null),
-                uploadUrls.resolve(form.getId(), answers));
+                uploadUrls.resolve(form.getId(), answers),
+                pdf.url(),
+                pdf.status() == null ? null : pdf.status().name());
     }
 
-    /**
-     * Recipient display names in one query. Sent forms from the legacy endpoints may hold ids that are not
-     * recipient UUIDs; those simply get no name.
-     */
+
     private Map<String, String> recipientNames(Collection<String> recipientIds) {
         List<UUID> ids = recipientIds.stream().distinct()
                 .map(RecipientService::parseId).flatMap(Optional::stream).toList();

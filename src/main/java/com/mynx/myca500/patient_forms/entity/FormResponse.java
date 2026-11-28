@@ -1,7 +1,10 @@
 package com.mynx.myca500.patient_forms.entity;
 
 import jakarta.persistence.Column;
+import com.mynx.myca500.patient_forms.enums.PdfStatus;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -41,6 +44,18 @@ public class FormResponse {
 
     @Column(nullable = false, length = 20) private String status;
     private Instant submittedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20) private PdfStatus pdfStatus;
+
+    @Column(length = 512, insertable = false, updatable = false) private String pdfKey;
+    @Column(insertable = false, updatable = false) private Instant pdfGeneratedAt;
+    @Column(insertable = false, updatable = false) private int pdfAttempts;
+    @Column(insertable = false, updatable = false) private Instant pdfNextAttemptAt;
+    @Column(insertable = false, updatable = false) private Instant pdfProcessingStartedAt;
+    @Column(insertable = false, updatable = false) private Instant pdfFailedAt;
+    @Column(length = 300, insertable = false, updatable = false) private String pdfLastError;
+
     @Column(nullable = false, updatable = false) private Instant createdAt;
     @Column(nullable = false) private Instant updatedAt;
 

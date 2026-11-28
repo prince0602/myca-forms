@@ -63,7 +63,6 @@ public class TemplateImageFacade {
     public FormTemplateDetailResponse get(UUID id)        { return render(service.get(id)); }
 
 
-    /** Replaces stored image file names with presigned GET URLs so the client can render them. */
     public FormTemplateDetailResponse render(FormTemplateDetailResponse r) {
         return r.withFields(resolver.resolve(r.fields()));
     }
@@ -83,7 +82,6 @@ public class TemplateImageFacade {
             if (!files.containsKey(ref)) existing.put(ref, normalizeExisting(ref));
         }
 
-        // Reject an invalid template before spending S3 uploads on it.
         if (!files.isEmpty()) validator.validateAndNormalize(req.payload());
 
         Map<String, String> uploaded = files.isEmpty() ? Map.of() : uploader.uploadAll(files);

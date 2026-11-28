@@ -45,7 +45,7 @@ public final class CompiledFormSchema {
 
 
 
-    static String optionKey(FieldOption o) {
+    public static String optionKey(FieldOption o) {
         if (o == null) return null;
         return o.id() != null && !o.id().isBlank() ? o.id() : o.label();
     }

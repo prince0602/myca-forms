@@ -12,7 +12,7 @@ import software.amazon.awssdk.services.s3.S3ClientBuilder;
 
 
 @Configuration
-@EnableConfigurationProperties(ImageProperties.class)
+@EnableConfigurationProperties({ImageProperties.class, PdfProperties.class})
 public class S3ClientConfig {
 
     @Bean

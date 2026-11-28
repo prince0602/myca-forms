@@ -11,5 +11,7 @@ public record SentFormPreview(
         List<FormFieldDto> fields,
         Map<String, Object> answers,
         String responseStatus,
-        Map<String, String> fileUrls) {
+        Map<String, String> fileUrls,
+        String pdfUrl,
+        String pdfStatus) {
 }

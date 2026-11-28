@@ -12,6 +12,7 @@ import com.mynx.myca500.patient_forms.entity.FormLink;
 import com.mynx.myca500.patient_forms.entity.FormResponse;
 import com.mynx.myca500.patient_forms.entity.FormTemplateVersion;
 import com.mynx.myca500.patient_forms.entity.SentForm;
+import com.mynx.myca500.patient_forms.enums.PdfStatus;
 import com.mynx.myca500.patient_forms.enums.SentFormStatus;
 import com.mynx.myca500.patient_forms.event.FormSubmittedEvent;
 import com.mynx.myca500.patient_forms.exception.FormLinkException;
@@ -59,6 +60,7 @@ public class PublicFormService {
     private final ApplicationEventPublisher events;
     private final ImageUrlResolver imageUrls;
     private final FormUploadUrlResolver uploadUrls;
+    private final FormResponsePdfService pdfs;
 
 
     @Transactional
@@ -94,7 +96,8 @@ public class PublicFormService {
                 imageUrls.resolve(fieldsOf(version)),
                 answers,
                 saved.map(FormResponse::getLockVersion).orElse(null),
-                uploadUrls.resolve(form.getId(), answers));
+                uploadUrls.resolve(form.getId(), answers),
+                access.submitted() ? saved.map(pdfs::access).map(FormResponsePdfService.PdfAccess::url).orElse(null) : null);
     }
 
 
@@ -182,6 +185,7 @@ public class PublicFormService {
         response.setAnswers(answers);
         response.setStatus("SUBMITTED");
         response.setSubmittedAt(now);
+        response.setPdfStatus(PdfStatus.PENDING);
         FormResponse saved = responses.save(response);
 
         if (!linkService.markUsed(access.link().getId(), now)) {
@@ -198,10 +202,6 @@ public class PublicFormService {
         return newUpload(form.getId(), ext);
     }
 
-    /**
-     * Issues several upload slots with one token check, so a form with many signatures needs one call
-     * (and one rate-limit hit) instead of one per file. All extensions are validated before any URL is signed.
-     */
     public BatchUploadResponse createUploads(String token, List<String> extensions) {
         List<String> exts = extensions.stream().map(PublicFormService::uploadExtension).toList();
         SentForm form = resolver.forWrite(token).sentForm();

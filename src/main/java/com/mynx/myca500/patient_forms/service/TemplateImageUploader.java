@@ -82,7 +82,7 @@ public class TemplateImageUploader {
         }
     }
 
-    private static String sniff(byte[] h) {
+    static String sniff(byte[] h) {
         if (h.length >= 8 && (h[0] & 0xFF) == 0x89 && h[1] == 'P' && h[2] == 'N' && h[3] == 'G') return "image/png";
         if (h.length >= 3 && (h[0] & 0xFF) == 0xFF && (h[1] & 0xFF) == 0xD8 && (h[2] & 0xFF) == 0xFF) return "image/jpeg";
         if (h.length >= 12 && h[0]=='R' && h[1]=='I' && h[2]=='F' && h[3]=='F'

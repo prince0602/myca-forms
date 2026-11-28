@@ -6,6 +6,7 @@ import com.mynx.myca500.patient_forms.dto.FormLinkResponse;
 import com.mynx.myca500.patient_forms.dto.FormTemplateDetailResponse;
 import com.mynx.myca500.patient_forms.dto.FormTemplateListItem;
 import com.mynx.myca500.patient_forms.dto.Paginated;
+import com.mynx.myca500.patient_forms.dto.PdfStatusResponse;
 import com.mynx.myca500.patient_forms.dto.SaveFormTemplateRequest;
 import com.mynx.myca500.patient_forms.dto.SavedComponentRequest;
 import com.mynx.myca500.patient_forms.dto.SavedComponentResponse;
@@ -14,6 +15,7 @@ import com.mynx.myca500.patient_forms.dto.SentFormPreview;
 import com.mynx.myca500.patient_forms.exception.ResourceCreationException;
 import com.mynx.myca500.patient_forms.exception.ValidationException;
 import com.mynx.myca500.patient_forms.service.FormAssignmentService;
+import com.mynx.myca500.patient_forms.service.FormResponsePdfService;
 import com.mynx.myca500.patient_forms.service.FormTemplateService;
 import com.mynx.myca500.patient_forms.service.SavedComponentService;
 import com.mynx.myca500.patient_forms.service.SentFormQueryService;
@@ -69,6 +71,9 @@ public class FormTemplateController {
 
     @Autowired
     private SentFormQueryService sentFormQueryService;
+
+    @Autowired
+    private FormResponsePdfService pdfService;
 
     @GetMapping
     public Paginated<FormTemplateListItem> list(
@@ -136,7 +141,6 @@ public class FormTemplateController {
         return ResponseEntity.ok(facade.render(service.duplicate(id)));
     }
 
-    /** Creates a shareable fill link for a patient, pinned to the template's current version. */
     @PostMapping("/{id}/links")
     public ResponseEntity<FormLinkResponse> createLink(@PathVariable UUID id,
                                                        @Valid @RequestBody FormLinkRequest request,
@@ -159,6 +163,10 @@ public class FormTemplateController {
     @GetMapping("/{id}/sent-forms/{sentFormId}")
     public SentFormPreview sentFormPreview(@PathVariable UUID id, @PathVariable UUID sentFormId) {
         return sentFormQueryService.preview(id, sentFormId);
+    }
+    @PostMapping("/{id}/sent-forms/{sentFormId}/pdf/retry")
+    public ResponseEntity<PdfStatusResponse> retrySentFormPdf(@PathVariable UUID id, @PathVariable UUID sentFormId) {
+        return ResponseEntity.accepted().body(new PdfStatusResponse(pdfService.retry(id, sentFormId).name()));
     }
 
     @PostMapping("/component")

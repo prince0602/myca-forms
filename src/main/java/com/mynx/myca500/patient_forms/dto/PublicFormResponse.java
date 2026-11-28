@@ -15,5 +15,6 @@ public record PublicFormResponse(
         List<FormFieldDto> fields,
         Map<String, Object> answers,
         Long lockVersion,
-        Map<String, String> fileUrls
+        Map<String, String> fileUrls,
+        String pdfUrl
 ) {}
